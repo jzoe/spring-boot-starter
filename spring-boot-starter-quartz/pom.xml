@@ -8,6 +8,33 @@
     <artifactId>spring-boot-starter-quartz</artifactId>
     <version>1.0</version>
 
+    <licenses>
+        <license>
+            <name>The Apache Software License, Version 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+    <scm>
+        <tag>master</tag>
+        <url>git@github.com:ArtIsLong/spring-boot-starter.git</url>
+        <connection>scm:git:git@github.com:ArtIsLong/spring-boot-starter.git</connection>
+        <developerConnection>scm:git:git@github.com:ArtIsLong/spring-boot-starter.git</developerConnection>
+    </scm>
+    <developers>
+        <developer>
+            <name>bill_chen</name>
+            <email>15221499301@163.com</email>
+            <organization>fndsoft</organization>
+        </developer>
+    </developers>
+
+    <parent>
+        <groupId>org.sonatype.oss</groupId>
+        <artifactId>oss-parent</artifactId>
+        <version>7</version>
+    </parent>
+
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
