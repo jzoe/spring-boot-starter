@@ -1,7 +1,7 @@
 package com.quartz.config;
 
-import com.quartz.pojo.AmsTimedTaskParamTd;
-import com.quartz.pojo.AmsTimedTaskTd;
+import com.quartz.pojo.QrtzTimedTaskParamTd;
+import com.quartz.pojo.QrtzTimedTaskTd;
 import com.quartz.utils.BeanUtil;
 import org.quartz.Trigger;
 import org.slf4j.Logger;
@@ -40,7 +40,7 @@ public class QuartzAutoConfiguration implements BeanFactoryAware {
 
     private BeanFactory beanFactory;
 
-    private static Map<String, AmsTimedTaskTd> taskExecutorMap = new LinkedHashMap<String, AmsTimedTaskTd>();
+    private static Map<String, QrtzTimedTaskTd> taskExecutorMap = new LinkedHashMap<String, QrtzTimedTaskTd>();
 
     @Bean
     public List<BeanInvokingJobDetailFactoryBean> methodInvokingJobDetailFactoryBean(JdbcTemplate jdbcTemplate, QuartzProperties quartzProperties) throws Exception {
@@ -48,15 +48,15 @@ public class QuartzAutoConfiguration implements BeanFactoryAware {
         taskExecutorMap.putAll(getTaskExecutors(jdbcTemplate));
         for (String key: taskExecutorMap.keySet()) {
             String beanName = key + "JobDetail";
-            AmsTimedTaskTd amsTimedTaskTd = taskExecutorMap.get(key);
-            Map<String, Object> params = buildParams(amsTimedTaskTd);
-            String targetObject = buildTargetObject(amsTimedTaskTd);
+            QrtzTimedTaskTd qrtzTimedTaskTd = taskExecutorMap.get(key);
+            Map<String, Object> params = buildParams(qrtzTimedTaskTd);
+            String targetObject = buildTargetObject(qrtzTimedTaskTd);
             BeanDefinitionBuilder beanDefinitionBuilder = BeanDefinitionBuilder.genericBeanDefinition(BeanInvokingJobDetailFactoryBean.class).setScope("prototype");
-            if (!ObjectUtils.isEmpty(amsTimedTaskTd.getTaskGroup())) {
-                beanDefinitionBuilder.addPropertyValue("group", amsTimedTaskTd.getTaskGroup());
+            if (!ObjectUtils.isEmpty(qrtzTimedTaskTd.getTaskGroup())) {
+                beanDefinitionBuilder.addPropertyValue("group", qrtzTimedTaskTd.getTaskGroup());
             }
             configurableBeanFactory.registerBeanDefinition(beanName, beanDefinitionBuilder
-                    .addPropertyValue("targetMethod", amsTimedTaskTd.getTaskMethod())
+                    .addPropertyValue("targetMethod", qrtzTimedTaskTd.getTaskMethod())
                     .addPropertyValue("arguments", new Object[]{params})
                     .addPropertyValue("targetBean", targetObject)
                     .addPropertyValue("durable", quartzProperties.getDurability())
@@ -72,10 +72,10 @@ public class QuartzAutoConfiguration implements BeanFactoryAware {
     public List<CronTriggerFactoryBean> cronTriggerFactoryBean() {
         DefaultListableBeanFactory configurableBeanFactory = (DefaultListableBeanFactory ) beanFactory;
         for (String key: taskExecutorMap.keySet()) {
-            AmsTimedTaskTd amsTimedTaskTd = taskExecutorMap.get(key);
+            QrtzTimedTaskTd qrtzTimedTaskTd = taskExecutorMap.get(key);
             configurableBeanFactory.registerBeanDefinition(key + "Trigger", BeanDefinitionBuilder.genericBeanDefinition(CronTriggerFactoryBean.class).setScope("prototype")
                     .addPropertyReference("jobDetail", key + "JobDetail")
-                    .addPropertyValue("cronExpression", amsTimedTaskTd.getTaskExpres())
+                    .addPropertyValue("cronExpression", qrtzTimedTaskTd.getTaskExpres())
                     .getRawBeanDefinition());
         }
         return null;
@@ -112,22 +112,22 @@ public class QuartzAutoConfiguration implements BeanFactoryAware {
         this.beanFactory = beanFactory;
     }
 
-    private Map<String, AmsTimedTaskTd> getTaskExecutors(JdbcTemplate jdbcTemplate) {
-        Map<String, AmsTimedTaskTd> taskExecutorMap = new LinkedHashMap<String, AmsTimedTaskTd>();
-        List<AmsTimedTaskTd> amsTimedTaskTds = jdbcTemplate.query(SELECT_AMS_TASK, new BeanPropertyRowMapper<AmsTimedTaskTd>(AmsTimedTaskTd.class));
-        for (AmsTimedTaskTd amsTimedTaskTd : amsTimedTaskTds) {
-            List<AmsTimedTaskParamTd> taskParamTds = jdbcTemplate.query(SELECT_AMS_TASK_PARAM, new BeanPropertyRowMapper<AmsTimedTaskParamTd>(AmsTimedTaskParamTd.class), amsTimedTaskTd.getTaskName());
-            amsTimedTaskTd.setAmsTimedTaskParamTds(taskParamTds);
-            taskExecutorMap.put(amsTimedTaskTd.getTaskName(), amsTimedTaskTd);
+    private Map<String, QrtzTimedTaskTd> getTaskExecutors(JdbcTemplate jdbcTemplate) {
+        Map<String, QrtzTimedTaskTd> taskExecutorMap = new LinkedHashMap<String, QrtzTimedTaskTd>();
+        List<QrtzTimedTaskTd> qrtzTimedTaskTds = jdbcTemplate.query(SELECT_AMS_TASK, new BeanPropertyRowMapper<QrtzTimedTaskTd>(QrtzTimedTaskTd.class));
+        for (QrtzTimedTaskTd qrtzTimedTaskTd : qrtzTimedTaskTds) {
+            List<QrtzTimedTaskParamTd> taskParamTds = jdbcTemplate.query(SELECT_AMS_TASK_PARAM, new BeanPropertyRowMapper<QrtzTimedTaskParamTd>(QrtzTimedTaskParamTd.class), qrtzTimedTaskTd.getTaskName());
+            qrtzTimedTaskTd.setQrtzTimedTaskParamTds(taskParamTds);
+            taskExecutorMap.put(qrtzTimedTaskTd.getTaskName(), qrtzTimedTaskTd);
         }
         return taskExecutorMap;
     }
 
-    private Map<String, Object> buildParams(AmsTimedTaskTd amsTimedTaskTd) {
+    private Map<String, Object> buildParams(QrtzTimedTaskTd qrtzTimedTaskTd) {
         Map<String, Object> param = new HashMap<String, Object>();
-        List<AmsTimedTaskParamTd> taskParams = amsTimedTaskTd.getAmsTimedTaskParamTds();
+        List<QrtzTimedTaskParamTd> taskParams = qrtzTimedTaskTd.getQrtzTimedTaskParamTds();
         if (!taskParams.isEmpty()) {
-            for (AmsTimedTaskParamTd taskParam : taskParams) {
+            for (QrtzTimedTaskParamTd taskParam : taskParams) {
                 String paramKey = taskParam.getParamKey();
                 String paramValue = taskParam.getParamValue();
                 String paramType = taskParam.getParamType();
@@ -141,8 +141,8 @@ public class QuartzAutoConfiguration implements BeanFactoryAware {
         return param;
     }
 
-    private String buildTargetObject(AmsTimedTaskTd amsTimedTaskTd) {
-        String taskInterFace = amsTimedTaskTd.getTaskClass();
+    private String buildTargetObject(QrtzTimedTaskTd qrtzTimedTaskTd) {
+        String taskInterFace = qrtzTimedTaskTd.getTaskClass();
         String interFaceName = taskInterFace.substring(taskInterFace.lastIndexOf(".") + 1);
         String beanName = null;
 

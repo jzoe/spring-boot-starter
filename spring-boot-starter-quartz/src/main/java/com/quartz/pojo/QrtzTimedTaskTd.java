@@ -8,7 +8,7 @@ import java.util.List;
 /**
  * Created by 陈敏 on 2017/4/18.
  */
-public class AmsTimedTaskTd implements Serializable {
+public class QrtzTimedTaskTd implements Serializable {
     private static final long serialVersionUID = 6302921962918981967L;
 
     private Long taskId;
@@ -27,7 +27,7 @@ public class AmsTimedTaskTd implements Serializable {
     private Date ext3;
     private Date ext4;
 
-    private List<AmsTimedTaskParamTd> amsTimedTaskParamTds = new ArrayList<AmsTimedTaskParamTd>();
+    private List<QrtzTimedTaskParamTd> qrtzTimedTaskParamTds = new ArrayList<QrtzTimedTaskParamTd>();
 
     public Long getTaskId() {
         return taskId;
@@ -149,11 +149,11 @@ public class AmsTimedTaskTd implements Serializable {
         this.creater = creater;
     }
 
-    public List<AmsTimedTaskParamTd> getAmsTimedTaskParamTds() {
-        return amsTimedTaskParamTds;
+    public List<QrtzTimedTaskParamTd> getQrtzTimedTaskParamTds() {
+        return qrtzTimedTaskParamTds;
     }
 
-    public void setAmsTimedTaskParamTds(List<AmsTimedTaskParamTd> amsTimedTaskParamTds) {
-        this.amsTimedTaskParamTds.addAll(amsTimedTaskParamTds);
+    public void setQrtzTimedTaskParamTds(List<QrtzTimedTaskParamTd> qrtzTimedTaskParamTds) {
+        this.qrtzTimedTaskParamTds.addAll(qrtzTimedTaskParamTds);
     }
 }

@@ -5,7 +5,7 @@ import java.io.Serializable;
 /**
  * Created by 陈敏 on 2017/4/27.
  */
-public class AmsTimedTaskParamTd implements Serializable {
+public class QrtzTimedTaskParamTd implements Serializable {
 
     private static final long serialVersionUID = -2335037495608987344L;
     private Long paramId;
