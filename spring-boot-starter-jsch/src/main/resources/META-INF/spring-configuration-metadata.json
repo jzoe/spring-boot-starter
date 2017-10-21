@@ -1,0 +1,67 @@
+{
+  "hints": [],
+  "groups": [
+    {
+      "sourceType": "com.jsch.config.SSHProperties",
+      "name": "ssh",
+      "type": "com.jsch.config.SSHProperties"
+    }
+  ],
+  "properties": [
+    {
+      "sourceType": "com.jsch.config.SSHProperties",
+      "defaultValue": "",
+      "name": "ssh.ipAddress",
+      "description": "远端服务器IP地址",
+      "type": "java.lang.String"
+    },
+    {
+      "sourceType": "com.jsch.config.SSHProperties",
+      "defaultValue": "",
+      "name": "ssh.username",
+      "description": "远端服务器用户名",
+      "type": "java.lang.String"
+    },
+    {
+      "sourceType": "com.jsch.config.SSHProperties",
+      "defaultValue": "",
+      "name": "ssh.password",
+      "description": "远端服务器密码",
+      "type": "java.lang.String"
+    },
+    {
+      "sourceType": "com.jsch.config.SSHProperties",
+      "defaultValue": "10",
+      "name": "ssh.maxSize",
+      "description": "远端服务器最大连接",
+      "type": "java.lang.Integer"
+    },
+    {
+      "sourceType": "com.jsch.config.SSHProperties",
+      "defaultValue": "22",
+      "name": "ssh.sshPort",
+      "description": "远端服务器连接端口",
+      "type": "java.lang.Integer"
+    },
+    {
+      "sourceType": "com.jsch.config.SSHProperties",
+      "defaultValue": "60",
+      "name": "ssh.timeout",
+      "description": "远端服务器连接超时时间（秒）",
+      "type": "java.lang.Integer"
+    },
+    {
+      "sourceType": "com.jsch.config.SSHProperties",
+      "defaultValue": "",
+      "name": "ssh.publicKey",
+      "description": "密码公钥",
+      "type": "java.lang.String"
+    },
+    {
+      "sourceType": "com.jsch.config.SSHProperties",
+      "name": "ssh.sshInfo",
+      "description": "多服务器配置",
+      "type": "java.util.Map<java.lang.String, com.jsch.config.SSHProperties.SSHInfo>"
+    }
+  ]
+}
