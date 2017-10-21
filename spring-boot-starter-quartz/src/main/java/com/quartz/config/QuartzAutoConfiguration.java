@@ -35,8 +35,8 @@ import java.util.*;
 public class QuartzAutoConfiguration implements BeanFactoryAware {
 
     private static final Logger logger = LoggerFactory.getLogger(QuartzAutoConfiguration.class);
-    private static final String SELECT_AMS_TASK = "SELECT * FROM AMS_TIMED_TASK_TD T WHERE T.STATUS = 'U'";
-    private static final String SELECT_AMS_TASK_PARAM = "SELECT * FROM AMS_TIMED_TASK_PARAM_TD T WHERE T.TASK_NAME = ?";
+    private static final String SELECT_AMS_TASK = "SELECT * FROM QRTZ_TIMED_TASK_TD T WHERE T.STATUS = 'U'";
+    private static final String SELECT_AMS_TASK_PARAM = "SELECT * FROM QRTZ_TIMED_TASK_PARAM_TD T WHERE T.TASK_NAME = ?";
 
     private BeanFactory beanFactory;
 
