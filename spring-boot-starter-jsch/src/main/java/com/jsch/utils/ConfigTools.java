@@ -16,10 +16,9 @@
 package com.jsch.utils;
 
 
-import com.fndsoft.util.FileUtil;
-
 import javax.crypto.Cipher;
 import java.io.ByteArrayOutputStream;
+import java.io.Closeable;
 import java.io.FileInputStream;
 import java.security.*;
 import java.security.cert.Certificate;
@@ -71,7 +70,7 @@ public class ConfigTools {
 		} catch (Exception e) {
 			throw new IllegalArgumentException("Failed to get public key", e);
 		} finally {
-			FileUtil.close(in);
+			close(in);
 		}
 	}
 
@@ -114,7 +113,7 @@ public class ConfigTools {
 		} catch (Exception e) {
 			throw new IllegalArgumentException("Failed to get public key", e);
 		} finally {
-			FileUtil.close(in);
+			close(in);
 		}
 	}
 
@@ -202,6 +201,18 @@ public class ConfigTools {
 		keyPairs[1] = Base64.byteArrayToBase64(keyPairBytes[1]);
 
 		return keyPairs;
+	}
+
+	public static void close(Closeable x) {
+		if (x == null) {
+			return;
+		}
+
+		try {
+			x.close();
+		} catch (Exception e) {
+			throw new IllegalArgumentException("close error", e);
+		}
 	}
 
 }
