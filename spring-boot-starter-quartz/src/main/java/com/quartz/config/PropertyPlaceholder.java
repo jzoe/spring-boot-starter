@@ -6,6 +6,11 @@ import org.springframework.beans.factory.config.PropertyPlaceholderConfigurer;
 
 import java.util.Properties;
 
+/**
+ * @author 陈敏
+ * Create date ：2017/10/19.
+ * My blog： http://artislong.github.io
+ */
 public class PropertyPlaceholder extends PropertyPlaceholderConfigurer {
     private Properties properties = new Properties();
 

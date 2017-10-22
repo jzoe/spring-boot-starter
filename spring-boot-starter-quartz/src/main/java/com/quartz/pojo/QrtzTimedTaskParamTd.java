@@ -3,7 +3,9 @@ package com.quartz.pojo;
 import java.io.Serializable;
 
 /**
- * Created by 陈敏 on 2017/4/27.
+ * @author 陈敏
+ * Create date ：2017/10/19.
+ * My blog： http://artislong.github.io
  */
 public class QrtzTimedTaskParamTd implements Serializable {
 

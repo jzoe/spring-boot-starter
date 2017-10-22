@@ -6,7 +6,9 @@ import java.util.Date;
 import java.util.List;
 
 /**
- * Created by 陈敏 on 2017/4/18.
+ * @author 陈敏
+ * Create date ：2017/10/19.
+ * My blog： http://artislong.github.io
  */
 public class QrtzTimedTaskTd implements Serializable {
     private static final long serialVersionUID = 6302921962918981967L;

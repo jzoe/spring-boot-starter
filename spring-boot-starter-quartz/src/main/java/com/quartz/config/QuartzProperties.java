@@ -2,6 +2,11 @@ package com.quartz.config;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
+/**
+ * @author 陈敏
+ * Create date ：2017/10/19.
+ * My blog： http://artislong.github.io
+ */
 @ConfigurationProperties(prefix = "quartz", ignoreInvalidFields = true)
 public class QuartzProperties {
 

@@ -29,12 +29,18 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.util.*;
 
+/**
+ * @author 陈敏
+ * Create date ：2017/10/19.
+ * My blog： http://artislong.github.io
+ */
 @Configuration
 @ConditionalOnBean(DataSource.class)
 @EnableConfigurationProperties(QuartzProperties.class)
 public class QuartzAutoConfiguration implements BeanFactoryAware {
 
     private static final Logger logger = LoggerFactory.getLogger(QuartzAutoConfiguration.class);
+
     private static final String SELECT_AMS_TASK = "SELECT * FROM QRTZ_TIMED_TASK_TD T WHERE T.STATUS = 'U'";
     private static final String SELECT_AMS_TASK_PARAM = "SELECT * FROM QRTZ_TIMED_TASK_PARAM_TD T WHERE T.TASK_NAME = ?";
 
@@ -146,14 +152,15 @@ public class QuartzAutoConfiguration implements BeanFactoryAware {
         String interFaceName = taskInterFace.substring(taskInterFace.lastIndexOf(".") + 1);
         String beanName = null;
 
-        // 表中配置的是接口，则获取接口的实现类
         if (interFaceName.startsWith("I") && interFaceName.endsWith("SV")) {
             String taskImpl = interFaceName.substring(interFaceName.indexOf("I") + 1) + "Impl";
             beanName = taskImpl.substring(0, 1).toLowerCase() + taskImpl.substring(1);
         }
-        // 如果是实现类，则直接反射
         if (interFaceName.endsWith("SVImpl")) {
             beanName = interFaceName.substring(0, 1).toLowerCase() + interFaceName.substring(1);
+        }
+        if (!(interFaceName.startsWith("I") && interFaceName.endsWith("SV")) || !interFaceName.endsWith("SVImpl")) {
+            beanName = taskInterFace;
         }
 
         // 根据实现类类型，从Spring上下文中获取对应的Bean

@@ -1,7 +1,9 @@
 package com.quartz.exception;
 
 /**
- * Created by 陈敏 on 2017/3/21.
+ * @author 陈敏
+ * Create date ：2017/10/19.
+ * My blog： http://artislong.github.io
  */
 public class BusinessException extends RuntimeException {
     public BusinessException() {
