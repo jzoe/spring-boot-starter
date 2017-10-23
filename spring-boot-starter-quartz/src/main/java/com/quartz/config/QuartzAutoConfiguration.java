@@ -49,7 +49,7 @@ public class QuartzAutoConfiguration implements BeanFactoryAware {
     private static Map<String, QrtzTimedTaskTd> taskExecutorMap = new LinkedHashMap<String, QrtzTimedTaskTd>();
 
     @Bean
-    public List<BeanInvokingJobDetailFactoryBean> methodInvokingJobDetailFactoryBean(JdbcTemplate jdbcTemplate, QuartzProperties quartzProperties) throws Exception {
+    public List<BeanInvokingJobDetailFactoryBean> methodInvokingJobDetailFactoryBean(JdbcTemplate jdbcTemplate, QuartzProperties quartzProperties) {
         DefaultListableBeanFactory configurableBeanFactory = (DefaultListableBeanFactory ) beanFactory;
         taskExecutorMap.putAll(getTaskExecutors(jdbcTemplate));
         for (String key: taskExecutorMap.keySet()) {
@@ -88,7 +88,7 @@ public class QuartzAutoConfiguration implements BeanFactoryAware {
     }
 
     @Bean
-    public SchedulerFactoryBean schedulerFactoryBean(Trigger[] trigger, DataSource dataSource, QuartzProperties quartzProperties, @Qualifier("quartzPlaceholder") PropertyPlaceholder quartzPlaceholder) throws Exception {
+    public SchedulerFactoryBean schedulerFactoryBean(Trigger[] trigger, DataSource dataSource, QuartzProperties quartzProperties, @Qualifier("quartzPlaceholder") PropertyPlaceholder quartzPlaceholder) {
         SchedulerFactoryBean schedulerFactoryBean = new SchedulerFactoryBean();
         schedulerFactoryBean.setTriggers(trigger);
         Properties properties = quartzProperties();
