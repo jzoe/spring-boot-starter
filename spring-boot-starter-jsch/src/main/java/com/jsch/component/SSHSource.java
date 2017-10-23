@@ -18,7 +18,7 @@ import java.util.Properties;
  * Created by 陈敏 on 2017/8/21.
  * 远程连接服务器连接池
  */
-public class SSHSource implements InitializingBean{
+public class SSHSource implements InitializingBean {
 
     private static final Logger logger = LoggerFactory.getLogger(SSHSource.class);
 
@@ -28,31 +28,31 @@ public class SSHSource implements InitializingBean{
 
     private JSch jSch = new JSch();
 
-    private String              ipAddress   =   "";
-    private String              username    =   "";
-    private String              password    =   "";
-    private String              publicKey   =   "";
-    private int                 maxSize = DEFAULT_MAX_SIZE;  // 连接池最大连接数
-    private int                 sshPort = DEFAULT_SSH_PORT;  // 端口
-    private int                 timeout = DEFAULT_TIME_OUT;
+    private String ipAddress = "";
+    private String username = "";
+    private String password = "";
+    private String publicKey = "";
+    private int maxSize = DEFAULT_MAX_SIZE;  // 连接池最大连接数
+    private int sshPort = DEFAULT_SSH_PORT;  // 端口
+    private int timeout = DEFAULT_TIME_OUT;
 
     private LinkedList<Session> sources = new LinkedList<Session>();
+
     public SSHSource() {
     }
 
     private SSHSource init() {
-        for (int i = 0; i < maxSize; i++) {
-            Session session;
-            try {
-                session = buildSession(username, ipAddress, sshPort);
+        try {
+            for (int i = 0; i < maxSize; i++) {
+                Session session = buildSession(username, ipAddress, sshPort);
                 session.setUserInfo(new SSHUserInfo());
                 String passwd = buildPasswd(password, publicKey);
                 session.setPassword(passwd);
 //                session.connect();
                 sources.add(session);
-            } catch (Exception e) {
-                throw new BusinessException("Session Source Inited error");
             }
+        } catch (Exception e) {
+            throw new BusinessException("Session Source Inited error");
         }
         return this;
     }
@@ -60,12 +60,12 @@ public class SSHSource implements InitializingBean{
     public Session buildSession(String username, String ipAddress, int sshPort) throws JSchException {
         Session session = jSch.getSession(username, ipAddress, sshPort);
         Properties sshConfig = new Properties();
-        sshConfig.put("StrictHostKeyChecking","no");
+        sshConfig.put("StrictHostKeyChecking", "no");
         session.setConfig(sshConfig);
         return session;
     }
 
-    public String buildPasswd(String password, String publicKey){
+    public String buildPasswd(String password, String publicKey) {
         String passwd = password;
         if (!ObjectUtils.isEmpty(publicKey)) {
             try {
@@ -78,7 +78,7 @@ public class SSHSource implements InitializingBean{
     }
 
     public Session getSession() {
-        if(sources.isEmpty()) {
+        if (sources.isEmpty()) {
             throw new BusinessException("The session of Sources is Empty!");
         }
         return sources.removeFirst();
@@ -160,6 +160,15 @@ public class SSHSource implements InitializingBean{
         return this;
     }
 
+    public String getPublicKey() {
+        return publicKey;
+    }
+
+    public SSHSource setPublicKey(String publicKey) {
+        this.publicKey = publicKey;
+        return this;
+    }
+
     private static class SSHUserInfo implements UserInfo {
         private String password;
         private String passphrase;
@@ -197,7 +206,7 @@ public class SSHSource implements InitializingBean{
         public boolean promptYesNo(String s) {
             System.out.println("MyUserInfo.promptYesNo");
             System.out.println(s);
-            if(s.contains("The authenticity of host")) {
+            if (s.contains("The authenticity of host")) {
                 return true;
             }
             return false;
