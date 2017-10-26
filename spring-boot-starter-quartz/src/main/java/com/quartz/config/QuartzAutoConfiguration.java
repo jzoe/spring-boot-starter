@@ -138,13 +138,13 @@ public class QuartzAutoConfiguration implements BeanFactoryAware, EnvironmentAwa
             taskPrefix = TASK_PREFIX;
         }
         if (ObjectUtils.isEmpty(taskName)) {
-            taskName = TASK_NAME_SUFFIX;
+            taskName = taskPrefix + TASK_NAME_SUFFIX;
         }
         if (ObjectUtils.isEmpty(paramName)) {
-            paramName = TASK_PARAM_NAME_SUFFIX;
+            paramName = taskPrefix + TASK_PARAM_NAME_SUFFIX;
         }
-        selectTask.replace(TASK_PREFIX_SUBST, taskPrefix + taskName);
-        selectTaskParam.replace(PARAM_PREFIX_SUBST, taskPrefix + paramName);
+        selectTask.replace(TASK_PREFIX_SUBST, taskName);
+        selectTaskParam.replace(PARAM_PREFIX_SUBST, paramName);
     }
 
     private Map<String, QrtzTimedTask> getTaskExecutors(JdbcTemplate jdbcTemplate) {
