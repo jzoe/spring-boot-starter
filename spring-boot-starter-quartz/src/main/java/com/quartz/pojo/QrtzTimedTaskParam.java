@@ -7,7 +7,7 @@ import java.io.Serializable;
  * Create date ：2017/10/19.
  * My blog： http://artislong.github.io
  */
-public class QrtzTimedTaskParamTd implements Serializable {
+public class QrtzTimedTaskParam implements Serializable {
 
     private static final long serialVersionUID = -2335037495608987344L;
     private Long paramId;
@@ -16,6 +16,7 @@ public class QrtzTimedTaskParamTd implements Serializable {
     private String paramValue;
     private String paramType;
     private String paramDesc;
+    private Long sortId;
 
     public Long getParamId() {
         return paramId;
@@ -65,4 +66,11 @@ public class QrtzTimedTaskParamTd implements Serializable {
         this.paramDesc = paramDesc;
     }
 
+    public Long getSortId() {
+        return sortId;
+    }
+
+    public void setSortId(Long sortId) {
+        this.sortId = sortId;
+    }
 }

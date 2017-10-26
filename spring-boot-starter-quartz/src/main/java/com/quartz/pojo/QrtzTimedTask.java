@@ -10,7 +10,7 @@ import java.util.List;
  * Create date ：2017/10/19.
  * My blog： http://artislong.github.io
  */
-public class QrtzTimedTaskTd implements Serializable {
+public class QrtzTimedTask implements Serializable {
     private static final long serialVersionUID = 6302921962918981967L;
 
     private Long taskId;
@@ -20,7 +20,6 @@ public class QrtzTimedTaskTd implements Serializable {
     private String taskClass;
     private String taskMethod;
     private String taskGroup;
-    private String runMode;
     private String status;
     private Date createTime;
     private String creater;
@@ -29,7 +28,7 @@ public class QrtzTimedTaskTd implements Serializable {
     private Date ext3;
     private Date ext4;
 
-    private List<QrtzTimedTaskParamTd> qrtzTimedTaskParamTds = new ArrayList<QrtzTimedTaskParamTd>();
+    private List<QrtzTimedTaskParam> qrtzTimedTaskParams = new ArrayList<QrtzTimedTaskParam>();
 
     public Long getTaskId() {
         return taskId;
@@ -85,14 +84,6 @@ public class QrtzTimedTaskTd implements Serializable {
 
     public void setTaskGroup(String taskGroup) {
         this.taskGroup = taskGroup;
-    }
-
-    public String getRunMode() {
-        return runMode;
-    }
-
-    public void setRunMode(String runMode) {
-        this.runMode = runMode;
     }
 
     public String getStatus() {
@@ -151,11 +142,11 @@ public class QrtzTimedTaskTd implements Serializable {
         this.creater = creater;
     }
 
-    public List<QrtzTimedTaskParamTd> getQrtzTimedTaskParamTds() {
-        return qrtzTimedTaskParamTds;
+    public List<QrtzTimedTaskParam> getQrtzTimedTaskParams() {
+        return qrtzTimedTaskParams;
     }
 
-    public void setQrtzTimedTaskParamTds(List<QrtzTimedTaskParamTd> qrtzTimedTaskParamTds) {
-        this.qrtzTimedTaskParamTds.addAll(qrtzTimedTaskParamTds);
+    public void setQrtzTimedTaskParams(List<QrtzTimedTaskParam> qrtzTimedTaskParams) {
+        this.qrtzTimedTaskParams.addAll(qrtzTimedTaskParams);
     }
 }
