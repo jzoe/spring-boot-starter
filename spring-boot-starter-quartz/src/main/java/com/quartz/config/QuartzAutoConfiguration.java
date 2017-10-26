@@ -143,8 +143,8 @@ public class QuartzAutoConfiguration implements BeanFactoryAware, EnvironmentAwa
         if (ObjectUtils.isEmpty(paramName)) {
             paramName = taskPrefix + TASK_PARAM_NAME_SUFFIX;
         }
-        selectTask.replace(TASK_PREFIX_SUBST, taskName);
-        selectTaskParam.replace(PARAM_PREFIX_SUBST, paramName);
+        selectTask = selectTask.replace(TASK_PREFIX_SUBST, taskName);
+        selectTaskParam = selectTaskParam.replace(PARAM_PREFIX_SUBST, paramName);
     }
 
     private Map<String, QrtzTimedTask> getTaskExecutors(JdbcTemplate jdbcTemplate) {
@@ -184,13 +184,11 @@ public class QuartzAutoConfiguration implements BeanFactoryAware, EnvironmentAwa
         if (interFaceName.startsWith("I") && interFaceName.endsWith("SV")) {
             String taskImpl = interFaceName.substring(interFaceName.indexOf("I") + 1) + "Impl";
             beanName = taskImpl.substring(0, 1).toLowerCase() + taskImpl.substring(1);
-        }
-        if (interFaceName.endsWith("SVImpl")) {
+        } else if (interFaceName.endsWith("SVImpl")) {
             beanName = interFaceName.substring(0, 1).toLowerCase() + interFaceName.substring(1);
-        }
-        if (!(interFaceName.startsWith("I") && interFaceName.endsWith("SV")) || !interFaceName.endsWith("SVImpl")) {
+        } else if (!(interFaceName.startsWith("I") && interFaceName.endsWith("SV")) && !interFaceName.endsWith("SVImpl")) {
             if (interFaceName.contains(".")) {
-                beanName = interFaceName.substring(interFaceName.lastIndexOf("."));
+                beanName = interFaceName.substring(0, 1).toLowerCase() + interFaceName.substring(1);
             } else {
                 beanName = taskInterFace;
             }
