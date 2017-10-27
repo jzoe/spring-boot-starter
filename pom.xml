@@ -14,4 +14,13 @@
         <module>spring-boot-starter-quartz</module>
         <module>spring-boot-starter-jsch</module>
     </modules>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>1.16.16</version>
+            <scope>compile</scope>
+        </dependency>
+    </dependencies>
 </project>
