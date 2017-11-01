@@ -51,10 +51,10 @@ public class DruidDataSourceConfig {
         return filterRegistrationBean;
     }
 
-//    @Bean
-//    public LogFilter logfilterRegistrationBean() {
-//        LogFilter filter =  new Slf4jLogFilter();
-//        filter.setStatementExecutableSqlLogEnable(true);
-//        return filter;
-//    }
+    @Bean
+    public LogFilter logfilterRegistrationBean() {
+        LogFilter filter =  new Slf4jLogFilter();
+        filter.setStatementExecutableSqlLogEnable(true);
+        return filter;
+    }
 }

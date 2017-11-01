@@ -1,8 +1,6 @@
 package com.fndsoft.druid.config;
 
 import com.alibaba.druid.pool.DruidDataSource;
-import com.alibaba.druid.pool.DruidPooledConnection;
-import com.alibaba.druid.util.JdbcUtils;
 import com.fndsoft.druid.exception.BusinessException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,6 +8,7 @@ import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.PropertyValues;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.GenericBeanDefinition;
+import org.springframework.boot.autoconfigure.jdbc.DataSourceBuilder;
 import org.springframework.boot.bind.RelaxedDataBinder;
 import org.springframework.boot.bind.RelaxedPropertyResolver;
 import org.springframework.context.EnvironmentAware;
@@ -60,37 +59,7 @@ public class DynamicDataSourceRegister implements ImportBeanDefinitionRegistrar,
     private void initDruidDataSource(Environment environment) {
         RelaxedPropertyResolver propertyResolver = new RelaxedPropertyResolver(environment, "spring.datasource.");
         Map<String, Object> druidMap = propertyResolver.getSubProperties("druid" + ".");
-//        Properties properties = new Properties();
-//        for(Map.Entry<String, Object> entry : publicDruidConfig.entrySet()) {
-//            properties.put("druid." + entry.getKey(), entry.getValue().toString());
-//        }
-//        druidDataSource.configFromPropety(properties);
-//        druidDataSource.setInitialSize(publicDruidConfig.get("initialSize") == null?5:Integer.valueOf(publicDruidConfig.get("initialSize").toString()));
-//        druidDataSource.setMinIdle(publicDruidConfig.get("minIdle") == null?5:Integer.valueOf(publicDruidConfig.get("minIdle").toString()));
-//        druidDataSource.setMaxActive(publicDruidConfig.get("maxActive") == null?20:Integer.valueOf(publicDruidConfig.get("maxActive").toString()));
-//        druidDataSource.setMaxWait(publicDruidConfig.get("maxWait") == null?60000L: Long.valueOf(publicDruidConfig.get("maxWait").toString()));
-
-        druidDataSource = new DruidDataSource();
-        druidDataSource.setInitialSize(druidMap.get("initialSize") == null?5:Integer.valueOf(druidMap.get("initialSize").toString()));
-        druidDataSource.setMinIdle(druidMap.get("minIdle") == null?5:Integer.valueOf(druidMap.get("minIdle").toString()));
-        druidDataSource.setMaxActive(druidMap.get("maxActive") == null?20:Integer.valueOf(druidMap.get("maxActive").toString()));
-        druidDataSource.setMaxWait(druidMap.get("maxWait") == null?60000L: Long.valueOf(druidMap.get("maxWait").toString()));
-        druidDataSource.setTimeBetweenEvictionRunsMillis(druidMap.get("timeBetweenEvictionRunsMillis") == null?60000L:Long.valueOf(druidMap.get("timeBetweenEvictionRunsMillis").toString()));
-        druidDataSource.setMinEvictableIdleTimeMillis(druidMap.get("minEvictableIdleTimeMillis") == null?300000L: Long.valueOf(druidMap.get("minEvictableIdleTimeMillis").toString()));
-        druidDataSource.setValidationQuery(druidMap.get("validationQuery") == null?"SELECT 1 FROM DUAL":druidMap.get("validationQuery").toString());
-        druidDataSource.setTestWhileIdle(druidMap.get("testWhileIdle") == null?true:Boolean.getBoolean(druidMap.get("testWhileIdle").toString()));
-        druidDataSource.setTestOnBorrow(druidMap.get("testOnBorrow") == null?false:Boolean.getBoolean(druidMap.get("testOnBorrow").toString()));
-        druidDataSource.setTestOnReturn(druidMap.get("testOnReturn") == null?false:Boolean.getBoolean(druidMap.get("testOnReturn").toString()));
-        druidDataSource.setPoolPreparedStatements(druidMap.get("poolPreparedStatements") == null?true:Boolean.getBoolean(druidMap.get("poolPreparedStatements").toString()));
-        druidDataSource.setMaxPoolPreparedStatementPerConnectionSize(druidMap.get("maxPoolPreparedStatementPerConnectionSize") == null?20:Integer.valueOf(druidMap.get("maxPoolPreparedStatementPerConnectionSize").toString()));
-        try {
-            // filters为空，druid数据源没有加密，采用普通的配置方式
-            filters = druidMap.get("filters") == null?"static,wall,log4j":druidMap.get("filters").toString();
-            druidDataSource.setFilters(filters);
-        } catch (SQLException e) {
-            logger.error("配置监控统计拦截的filters失败");
-        }
-        druidDataSource.setUseGlobalDataSourceStat(druidMap.get("useGlobalDataSourceStat") == null?true:Boolean.getBoolean(druidMap.get("useGlobalDataSourceStat").toString()));
+        druidDataSource = (DruidDataSource) DruidDataSourceBuilder.create().type(DruidDataSource.class).setProperties(druidMap).build();
     }
 
     /**
@@ -209,17 +178,6 @@ public class DynamicDataSourceRegister implements ImportBeanDefinitionRegistrar,
         dataSource.setUsername(username);
         dataSource.setPassword(password);
         return dataSource;
-//        try {
-//            if(!dataSourceMap.containsKey("dataSourceProfix")) {
-//                DruidPooledConnection connection = dataSource.getConnection();
-//                logger.info(url + "数据源创建成功，连接：" + connection);
-//                JdbcUtils.close(connection);
-//            }
-//            return dataSource;
-//        } catch (SQLException e) {
-//            logger.info(url + "数据源创建失败，错误信息:{}", e.getMessage());
-//            return null;
-//        }
     }
 
     private void dataBinder(DataSource dataSource, Environment environment) {
