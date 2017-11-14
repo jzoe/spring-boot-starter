@@ -1,7 +1,7 @@
 package com.quartz.config;
 
-import com.quartz.pojo.QrtzTimedTaskParam;
-import com.quartz.pojo.QrtzTimedTask;
+import com.quartz.entity.QrtzTimedTaskParam;
+import com.quartz.entity.QrtzTimedTask;
 import com.quartz.utils.BeanUtil;
 import org.quartz.Trigger;
 import org.slf4j.Logger;

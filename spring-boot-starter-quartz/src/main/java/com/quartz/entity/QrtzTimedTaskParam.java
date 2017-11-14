@@ -1,4 +1,4 @@
-package com.quartz.pojo;
+package com.quartz.entity;
 
 import java.io.Serializable;
 
