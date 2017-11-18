@@ -1,8 +1,10 @@
 package com.quartz.config;
 
-import com.quartz.entity.QrtzTimedTaskParam;
 import com.quartz.entity.QrtzTimedTask;
+import com.quartz.entity.QrtzTimedTaskParam;
 import com.quartz.utils.BeanUtil;
+import com.quartz.utils.ScheduleUtil;
+import org.quartz.Scheduler;
 import org.quartz.Trigger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,10 +28,14 @@ import org.springframework.scheduling.quartz.SchedulerFactoryBean;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
+import javax.annotation.Resource;
 import javax.sql.DataSource;
 import java.io.File;
 import java.io.FileInputStream;
-import java.util.*;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
 
 import static com.quartz.constant.QuartzConstant.*;
 
@@ -117,6 +123,11 @@ public class QuartzAutoConfiguration implements BeanFactoryAware, EnvironmentAwa
         PropertyPlaceholder propertyPlaceholder = new PropertyPlaceholder();
         propertyPlaceholder.setLocation(new ClassPathResource("quartz.properties"));
         return propertyPlaceholder;
+    }
+
+    @Bean
+    public ScheduleUtil scheduleUtil(Scheduler scheduler) {
+        return new ScheduleUtil().setScheduler(scheduler);
     }
 
     @Override
@@ -211,16 +222,16 @@ public class QuartzAutoConfiguration implements BeanFactoryAware, EnvironmentAwa
         }
         File application = new File(path + "quartz.properties");
         if (!application.exists()) {
-            logger.error(path + "application.properties配置文件不存在，将使用默认配置");
+            logger.error(path + "quartz.properties配置文件不存在，将使用默认配置");
             return properties;
         }
         try {
             Properties applicationProperties = new Properties();
             applicationProperties.load(new FileInputStream(application));
             properties.putAll(applicationProperties);
-            logger.info("加载" + path + "application.properties" + "配置文件完成");
+            logger.info("加载" + path + "quartz.properties" + "配置文件完成");
         } catch (Exception e) {
-            logger.error("加载" + path + "application.properties" + "配置文件失败，错误信息: {}", e);
+            logger.error("加载" + path + "quartz.properties" + "配置文件失败，错误信息: {}", e);
             return properties;
         }
 

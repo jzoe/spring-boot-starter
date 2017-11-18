@@ -13,6 +13,7 @@
         <module>spring-boot-starter-druid</module>
         <module>spring-boot-starter-quartz</module>
         <module>spring-boot-starter-jsch</module>
+        <module>spring-boot-starter-quartz-examples</module>
     </modules>
 
     <dependencies>
