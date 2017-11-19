@@ -1,0 +1,1 @@
+package com.quartz.utils;/** * Created by chenmin on 17/11/19. */public class ClassUtil {    public static String getClassName(String classPath) {        return classPath.substring(0, 1).toLowerCase() + classPath.substring(1);    }}

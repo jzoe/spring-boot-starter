@@ -3,6 +3,7 @@ package com.quartz.config;
 import com.quartz.entity.QrtzTimedTask;
 import com.quartz.entity.QrtzTimedTaskParam;
 import com.quartz.utils.BeanUtil;
+import com.quartz.utils.ClassUtil;
 import com.quartz.utils.ScheduleUtil;
 import org.quartz.Scheduler;
 import org.quartz.Trigger;
@@ -42,8 +43,8 @@ import static com.quartz.constant.QuartzConstant.*;
 
 /**
  * @author 陈敏
- * Create date ：2017/10/19.
- * My blog： http://artislong.github.io
+ *         Create date ：2017/10/19.
+ *         My blog： http://artislong.github.io
  */
 @Configuration
 @ConditionalOnBean(DataSource.class)
@@ -73,9 +74,11 @@ public class QuartzAutoConfiguration implements BeanFactoryAware, EnvironmentAwa
             if (!ObjectUtils.isEmpty(qrtzTimedTask.getTaskGroup())) {
                 beanDefinitionBuilder.addPropertyValue("group", qrtzTimedTask.getTaskGroup());
             }
+            if (!params.isEmpty()) {
+                beanDefinitionBuilder.addPropertyValue("arguments", new Object[]{params});
+            }
             configurableBeanFactory.registerBeanDefinition(beanName, beanDefinitionBuilder
                     .addPropertyValue("targetMethod", qrtzTimedTask.getTaskMethod())
-                    .addPropertyValue("arguments", new Object[]{params})
                     .addPropertyValue("targetBean", targetObject)
                     .addPropertyValue("durable", quartzProperties.getDurability())
                     .addPropertyValue("shouldRecover", quartzProperties.getShouldRecover())
@@ -100,6 +103,7 @@ public class QuartzAutoConfiguration implements BeanFactoryAware, EnvironmentAwa
     }
 
     @Bean
+    @Resource
     public SchedulerFactoryBean schedulerFactoryBean(Trigger[] trigger, DataSource dataSource, QuartzProperties quartzProperties, @Qualifier("quartzPlaceholder") PropertyPlaceholder quartzPlaceholder) {
         SchedulerFactoryBean schedulerFactoryBean = new SchedulerFactoryBean();
         schedulerFactoryBean.setTriggers(trigger);
@@ -189,23 +193,19 @@ public class QuartzAutoConfiguration implements BeanFactoryAware, EnvironmentAwa
 
     private String buildTargetObject(QrtzTimedTask qrtzTimedTask) {
         String taskInterFace = qrtzTimedTask.getTaskClass();
-        String interFaceName = taskInterFace.substring(taskInterFace.lastIndexOf(".") + 1);
+        int tag = taskInterFace.lastIndexOf(".");
         String beanName = null;
-
-        if (interFaceName.startsWith("I") && interFaceName.endsWith("SV")) {
-            String taskImpl = interFaceName.substring(interFaceName.indexOf("I") + 1) + "Impl";
-            beanName = taskImpl.substring(0, 1).toLowerCase() + taskImpl.substring(1);
-        } else if (interFaceName.endsWith("SVImpl")) {
-            beanName = interFaceName.substring(0, 1).toLowerCase() + interFaceName.substring(1);
-        } else if (!(interFaceName.startsWith("I") && interFaceName.endsWith("SV")) && !interFaceName.endsWith("SVImpl")) {
-            if (interFaceName.contains(".")) {
-                beanName = interFaceName.substring(0, 1).toLowerCase() + interFaceName.substring(1);
+        if (tag > 0) {
+            String interFaceName = taskInterFace.substring(tag + 1);
+            if (interFaceName.startsWith("I") && interFaceName.endsWith("SV")) {
+                String taskImpl = interFaceName.substring(interFaceName.indexOf("I") + 1) + "Impl";
+                beanName = ClassUtil.getClassName(taskImpl);
             } else {
-                beanName = taskInterFace;
+                beanName = ClassUtil.getClassName(interFaceName);
             }
+        } else {
+            beanName = taskInterFace;
         }
-
-        // 根据实现类类型，从Spring上下文中获取对应的Bean
         return beanName;
     }
 
