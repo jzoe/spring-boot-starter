@@ -1,5 +1,6 @@
 package com.quartz.config;
 
+import com.quartz.model.TaskExecuter;
 import com.quartz.model.entity.QrtzTimedTask;
 import com.quartz.model.entity.QrtzTimedTaskParam;
 import com.quartz.utils.BeanUtil;
@@ -37,7 +38,6 @@ import java.util.Map;
 import java.util.Properties;
 
 import static com.quartz.constant.QuartzConstant.*;
-
 
 /**
  * @author 陈敏
@@ -125,6 +125,14 @@ public class QuartzAutoConfiguration implements BeanFactoryAware, EnvironmentAwa
         PropertyPlaceholder propertyPlaceholder = new PropertyPlaceholder();
         propertyPlaceholder.setLocation(new ClassPathResource("quartz.properties"));
         return propertyPlaceholder;
+    }
+
+    @Bean
+    public TaskExecuter taskExecuter(JdbcTemplate jdbcTemplate) {
+        return new TaskExecuter()
+                .setJdbcTemplate(jdbcTemplate)
+                .setTaskTableName(selectTask)
+                .setTaskParamTableName(selectTaskParam);
     }
 
     @Override
