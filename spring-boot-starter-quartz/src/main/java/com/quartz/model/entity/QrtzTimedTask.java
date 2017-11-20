@@ -1,4 +1,4 @@
-package com.quartz.entity;
+package com.quartz.model.entity;
 
 import java.io.Serializable;
 import java.util.ArrayList;

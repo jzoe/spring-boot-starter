@@ -1,6 +1,7 @@
 # spring-boot-starter-quartz
 
-针对公司业务要求，对quartz做了简单的封装，使任务定义简单化，支持相同任务实现，做不同任务执行，同时支持表配置传参功能。以下是在项目中具体使用方法:
+针对公司业务要求，对quartz做了简单的封装，使任务定义简单化，支持相同任务实现，
+做不同任务执行，同时支持表配置传参功能。以下是在项目中具体使用方法:
 
 ## 1、导入spring-boot-starter-quartz包
 
@@ -22,7 +23,8 @@ compile('com.github.quartz:spring-boot-starter-quartz:1.0')
 
 ## 2、新建任务配置表：
 
-脚本可在发布包的根目录中获得（task_oracle.sql，task_param_oracle.sql）
+脚本可在发布包的根目录中获得（task_oracle.sql）,Quartz集群的相关表
+可在Quartz的发布包org.quartz.impl.jdbcjobstore目录下找到相关SQL。
 
 - 任务配置表（QRTZ_TIMED_TASK_TD）
 
@@ -176,7 +178,8 @@ public class HelloSVImpl implements IHelloSV {
 
 - 优先配置接口类
 - 如需配置接口参数，在参数表中指定参数名，参数值，并指定task_name
-- 参数配置时，参数类型可为空，默认使用Map\<String, String\>  接收，当指定参数类型时，使用Map\<String, Object\> 接收，在代码中可使用强制类型转换
+- 参数配置时，参数类型可为空，默认使用Map\<String, String\>  接收，当指定参数类型时，
+    使用Map\<String, Object\> 接收，在代码中可使用强制类型转换
 - 参数类型只支持基本类型，配置时使用全路径 
 
 如：
@@ -192,4 +195,5 @@ VALUES (1, 'name', 'admin', null, '测试参数', 'hello2');
 
 ## 5、quartz配置
 
-此项目默认采用quartz集群方式。具体配置可在发布包根目录下的quartz.properties中查看。如需自定义配置，可在自己项目的classpath下新建quartz.properties文件进行配置。
+此项目默认采用quartz集群方式。具体配置可在发布包根目录下的quartz.properties中查看。
+如需自定义配置，可在自己项目的classpath下新建quartz.properties文件进行配置。

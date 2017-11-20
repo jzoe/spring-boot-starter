@@ -9,4 +9,6 @@ public class QuartzConstant {
 
     public static final String SELECT_TASK_SQL = "SELECT * FROM " + TASK_PREFIX_SUBST + " T WHERE T.STATUS = 'U'";
     public static final String SELECT_TASK_PARAM_SQL = "SELECT * FROM " + PARAM_PREFIX_SUBST + " T WHERE T.TASK_NAME = ? ORDER BY T.SORT_ID";
+
+    public static final String QUARTZ_DATA_KEY = "QUARTZ";
 }

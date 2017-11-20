@@ -1,11 +1,9 @@
 package com.quartz.config;
 
-import com.quartz.entity.QrtzTimedTask;
-import com.quartz.entity.QrtzTimedTaskParam;
+import com.quartz.model.entity.QrtzTimedTask;
+import com.quartz.model.entity.QrtzTimedTaskParam;
 import com.quartz.utils.BeanUtil;
 import com.quartz.utils.ClassUtil;
-import com.quartz.utils.ScheduleUtil;
-import org.quartz.Scheduler;
 import org.quartz.Trigger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -127,11 +125,6 @@ public class QuartzAutoConfiguration implements BeanFactoryAware, EnvironmentAwa
         PropertyPlaceholder propertyPlaceholder = new PropertyPlaceholder();
         propertyPlaceholder.setLocation(new ClassPathResource("quartz.properties"));
         return propertyPlaceholder;
-    }
-
-    @Bean
-    public ScheduleUtil scheduleUtil(Scheduler scheduler) {
-        return new ScheduleUtil().setScheduler(scheduler);
     }
 
     @Override
