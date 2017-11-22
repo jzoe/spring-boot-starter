@@ -1,6 +1,7 @@
 package com.quartz.config;
 
 import com.quartz.model.TaskExecuter;
+import com.quartz.model.assist.DbType;
 import com.quartz.model.entity.QrtzTimedTask;
 import com.quartz.model.entity.QrtzTimedTaskParam;
 import com.quartz.utils.BeanUtil;
@@ -129,10 +130,18 @@ public class QuartzAutoConfiguration implements BeanFactoryAware, EnvironmentAwa
 
     @Bean
     public TaskExecuter taskExecuter(JdbcTemplate jdbcTemplate) {
-        return new TaskExecuter()
-                .setJdbcTemplate(jdbcTemplate)
-                .setTaskTableName(selectTask)
-                .setTaskParamTableName(selectTaskParam);
+        String dbType = environment.getProperty("spring.datasource.dbType");
+        TaskExecuter taskExecuter = new TaskExecuter();
+        taskExecuter.setTaskTableName(selectTask);
+        taskExecuter.setTaskParamTableName(selectTaskParam);
+        taskExecuter.setJdbcTemplate(jdbcTemplate);
+        switch (dbType) {
+            case "MySQL":
+                taskExecuter.setDbType(DbType.MYSQL);
+            case "Oracle":
+                taskExecuter.setDbType(DbType.ORACLE);
+        }
+        return taskExecuter;
     }
 
     @Override
