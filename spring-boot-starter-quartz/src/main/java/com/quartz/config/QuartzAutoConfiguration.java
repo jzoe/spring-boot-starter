@@ -1,6 +1,6 @@
 package com.quartz.config;
 
-import com.quartz.model.TaskExecuter;
+import com.quartz.model.execute.TaskExecuter;
 import com.quartz.model.assist.DbType;
 import com.quartz.model.entity.QrtzTimedTask;
 import com.quartz.model.entity.QrtzTimedTaskParam;
@@ -52,8 +52,8 @@ public class QuartzAutoConfiguration implements BeanFactoryAware, EnvironmentAwa
 
     private static final Logger logger = LoggerFactory.getLogger(QuartzAutoConfiguration.class);
 
-    private String selectTask = SELECT_TASK_SQL;
-    private String selectTaskParam = SELECT_TASK_PARAM_SQL;
+    private String selectTask = "SELECT * FROM " + TASK_PREFIX_SUBST + " T WHERE T.STATUS = 'U'";
+    private String selectTaskParam = "SELECT * FROM " + PARAM_PREFIX_SUBST + " T WHERE T.TASK_NAME = ? ORDER BY T.SORT_ID";
 
     private BeanFactory beanFactory;
     private Environment environment;
@@ -131,7 +131,8 @@ public class QuartzAutoConfiguration implements BeanFactoryAware, EnvironmentAwa
     @Bean
     public TaskExecuter taskExecuter(JdbcTemplate jdbcTemplate) {
         String dbType = environment.getProperty("spring.datasource.dbType");
-        TaskExecuter taskExecuter = new TaskExecuter();
+        // TODO
+        TaskExecuter taskExecuter = null;
         taskExecuter.setTaskTableName(selectTask);
         taskExecuter.setTaskParamTableName(selectTaskParam);
         taskExecuter.setJdbcTemplate(jdbcTemplate);
