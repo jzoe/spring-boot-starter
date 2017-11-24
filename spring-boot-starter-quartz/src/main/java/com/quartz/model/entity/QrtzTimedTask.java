@@ -1,5 +1,7 @@
 package com.quartz.model.entity;
 
+import com.quartz.model.annotation.Id;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
@@ -13,6 +15,7 @@ import java.util.List;
 public class QrtzTimedTask implements Serializable {
     private static final long serialVersionUID = 6302921962918981967L;
 
+    @Id
     private Long taskId;
     private String taskName;
     private String taskDesc;

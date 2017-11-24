@@ -54,4 +54,8 @@ public class StringUtil {
     public static String getGetter(String name) {
         return "get" + name.substring(0, 1).toUpperCase() + name.substring(1);
     }
+
+    public static String remove(String src, String target) {
+        return src.substring(0, src.lastIndexOf(target));
+    }
 }

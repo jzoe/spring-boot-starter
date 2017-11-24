@@ -9,7 +9,10 @@ public class MySQLExecuter extends TaskExecuter {
 
     @Override
     protected String getITaskSQL(QrtzTimedTask qrtzTimedTask) {
-        Map<String, Object> taskMaps = build(qrtzTimedTask);
+        try {
+            Map<String, Object> taskMaps = buildISQL(qrtzTimedTask);
+        } catch (Exception e) {
+        }
 
         return null;
     }
