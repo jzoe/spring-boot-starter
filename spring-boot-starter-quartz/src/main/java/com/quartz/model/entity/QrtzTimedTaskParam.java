@@ -25,55 +25,62 @@ public class QrtzTimedTaskParam implements Serializable {
         return paramId;
     }
 
-    public void setParamId(Long paramId) {
+    public QrtzTimedTaskParam setParamId(Long paramId) {
         this.paramId = paramId;
+        return this;
     }
 
     public String getTaskName() {
         return taskName;
     }
 
-    public void setTaskName(String taskName) {
+    public QrtzTimedTaskParam setTaskName(String taskName) {
         this.taskName = taskName;
+        return this;
     }
 
     public String getParamKey() {
         return paramKey;
     }
 
-    public void setParamKey(String paramKey) {
+    public QrtzTimedTaskParam setParamKey(String paramKey) {
         this.paramKey = paramKey;
+        return this;
     }
 
     public String getParamValue() {
         return paramValue;
     }
 
-    public void setParamValue(String paramValue) {
+    public QrtzTimedTaskParam setParamValue(String paramValue) {
         this.paramValue = paramValue;
+        return this;
     }
 
     public String getParamType() {
         return paramType;
     }
 
-    public void setParamType(String paramType) {
+    public QrtzTimedTaskParam setParamType(String paramType) {
         this.paramType = paramType;
+        return this;
     }
 
     public String getParamDesc() {
         return paramDesc;
     }
 
-    public void setParamDesc(String paramDesc) {
+    public QrtzTimedTaskParam setParamDesc(String paramDesc) {
         this.paramDesc = paramDesc;
+        return this;
     }
 
     public Long getSortId() {
         return sortId;
     }
 
-    public void setSortId(Long sortId) {
+    public QrtzTimedTaskParam setSortId(Long sortId) {
         this.sortId = sortId;
+        return this;
     }
 }

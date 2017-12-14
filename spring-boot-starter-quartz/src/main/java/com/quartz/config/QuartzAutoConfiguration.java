@@ -1,12 +1,13 @@
 package com.quartz.config;
 
-import com.quartz.model.execute.TaskExecuter;
 import com.quartz.model.assist.DbType;
 import com.quartz.model.entity.QrtzTimedTask;
 import com.quartz.model.entity.QrtzTimedTaskParam;
+import com.quartz.model.execute.TaskExecuter;
 import com.quartz.utils.BeanUtil;
 import com.quartz.utils.ClassUtil;
 import org.quartz.Trigger;
+import org.quartz.TriggerKey;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
@@ -26,6 +27,7 @@ import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.scheduling.quartz.CronTriggerFactoryBean;
 import org.springframework.scheduling.quartz.SchedulerFactoryBean;
+import org.springframework.stereotype.Component;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
@@ -59,6 +61,18 @@ public class QuartzAutoConfiguration implements BeanFactoryAware, EnvironmentAwa
     private Environment environment;
 
     private static Map<String, QrtzTimedTask> taskExecutorMap = new LinkedHashMap<String, QrtzTimedTask>();
+
+    static {
+        String defaultScheduler = "defaultScheduler";
+        taskExecutorMap.put(defaultScheduler, new QrtzTimedTask()
+                .setTaskName(defaultScheduler)
+                .setTaskClass("com.quartz.config.QuartzAutoConfiguration.DefaultScheduler")
+                .setTaskExpres("0 0 0 * * ?")
+                .setTaskMethod("execute")
+                .setTaskDesc("default scheduler")
+                .setTaskGroup(TriggerKey.DEFAULT_GROUP)
+        );
+    }
 
     @Bean
     public List<BeanInvokingJobDetailFactoryBean> methodInvokingJobDetailFactoryBean(JdbcTemplate jdbcTemplate, QuartzProperties quartzProperties) {
@@ -104,6 +118,9 @@ public class QuartzAutoConfiguration implements BeanFactoryAware, EnvironmentAwa
     @Bean
     @Resource
     public SchedulerFactoryBean schedulerFactoryBean(Trigger[] trigger, DataSource dataSource, QuartzProperties quartzProperties, @Qualifier("quartzPlaceholder") PropertyPlaceholder quartzPlaceholder) {
+        for (Trigger tg : trigger) {
+            System.out.println(tg.getKey().getName());
+        }
         SchedulerFactoryBean schedulerFactoryBean = new SchedulerFactoryBean();
         schedulerFactoryBean.setTriggers(trigger);
         Properties properties = quartzProperties();
@@ -128,7 +145,7 @@ public class QuartzAutoConfiguration implements BeanFactoryAware, EnvironmentAwa
         return propertyPlaceholder;
     }
 
-    @Bean
+//    @Bean
     public TaskExecuter taskExecuter(JdbcTemplate jdbcTemplate) {
         String dbType = environment.getProperty("spring.datasource.dbType");
         // TODO
@@ -247,5 +264,12 @@ public class QuartzAutoConfiguration implements BeanFactoryAware, EnvironmentAwa
         }
 
         return properties;
+    }
+
+    @Component
+    public static class DefaultScheduler {
+        public void execute() {
+            logger.info("DefaultScheduler.execute");
+        }
     }
 }
