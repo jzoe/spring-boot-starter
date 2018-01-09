@@ -3,7 +3,7 @@ package com.quartz.config;
 import com.quartz.model.assist.DbType;
 import com.quartz.model.entity.QrtzTimedTask;
 import com.quartz.model.entity.QrtzTimedTaskParam;
-import com.quartz.model.execute.TaskExecuter;
+import com.quartz.jdbc.execute.TaskExecuter;
 import com.quartz.utils.BeanUtil;
 import com.quartz.utils.ClassUtil;
 import org.quartz.Trigger;
@@ -40,7 +40,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
-import static com.quartz.constant.QuartzConstant.*;
+import static com.quartz.model.constant.QuartzConstant.*;
 
 /**
  * @author 陈敏
@@ -147,19 +147,7 @@ public class QuartzAutoConfiguration implements BeanFactoryAware, EnvironmentAwa
 
 //    @Bean
     public TaskExecuter taskExecuter(JdbcTemplate jdbcTemplate) {
-        String dbType = environment.getProperty("spring.datasource.dbType");
-        // TODO
-        TaskExecuter taskExecuter = null;
-        taskExecuter.setTaskTableName(selectTask);
-        taskExecuter.setTaskParamTableName(selectTaskParam);
-        taskExecuter.setJdbcTemplate(jdbcTemplate);
-        switch (dbType) {
-            case "MySQL":
-                taskExecuter.setDbType(DbType.MYSQL);
-            case "Oracle":
-                taskExecuter.setDbType(DbType.ORACLE);
-        }
-        return taskExecuter;
+        return null;
     }
 
     @Override

@@ -18,7 +18,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static com.quartz.constant.QuartzConstant.QUARTZ_DATA_KEY;
+import static com.quartz.model.constant.QuartzConstant.QUARTZ_DATA_KEY;
 
 /**
  * Created by 陈敏 on 2017/11/19.
