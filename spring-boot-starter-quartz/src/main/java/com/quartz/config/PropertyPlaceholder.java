@@ -22,7 +22,6 @@ public class PropertyPlaceholder extends PropertyPlaceholderConfigurer {
         }
     }
 
-    //static method for accessing context properties
     public Object getProperty(Object name) {
         return properties.get(name);
     }
