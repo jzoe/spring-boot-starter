@@ -1,0 +1,1 @@
+package com.quartz.model.assist;public enum STATUS {    VALID("U"),    DISABLE("E");    private String value;    STATUS(String value) {        this.value = value;    }    public String getValue() {        return value;    }}

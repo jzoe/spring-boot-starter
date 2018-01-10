@@ -1,7 +1,5 @@
 package com.quartz.model.entity;
 
-import com.quartz.model.annotation.Id;
-
 import java.io.Serializable;
 
 /**
@@ -12,23 +10,12 @@ import java.io.Serializable;
 public class QrtzTimedTaskParam implements Serializable {
 
     private static final long serialVersionUID = -2335037495608987344L;
-    @Id
-    private Long paramId;
     private String taskName;
     private String paramKey;
     private String paramValue;
     private String paramType;
     private String paramDesc;
     private Long sortId;
-
-    public Long getParamId() {
-        return paramId;
-    }
-
-    public QrtzTimedTaskParam setParamId(Long paramId) {
-        this.paramId = paramId;
-        return this;
-    }
 
     public String getTaskName() {
         return taskName;

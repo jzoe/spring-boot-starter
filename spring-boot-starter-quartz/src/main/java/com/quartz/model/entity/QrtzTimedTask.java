@@ -1,6 +1,6 @@
 package com.quartz.model.entity;
 
-import com.quartz.model.annotation.Id;
+import com.quartz.model.assist.STATUS;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -14,16 +14,13 @@ import java.util.List;
  */
 public class QrtzTimedTask implements Serializable {
     private static final long serialVersionUID = 6302921962918981967L;
-
-    @Id
-    private Long taskId;
     private String taskName;
     private String taskDesc;
     private String taskExpres;
     private String taskClass;
     private String taskMethod;
     private String taskGroup;
-    private String status;
+    private STATUS status = STATUS.VALID;
     private Date createTime;
     private String creater;
     private String ext1;
@@ -32,15 +29,6 @@ public class QrtzTimedTask implements Serializable {
     private Date ext4;
 
     private List<QrtzTimedTaskParam> qrtzTimedTaskParams = new ArrayList<QrtzTimedTaskParam>();
-
-    public Long getTaskId() {
-        return taskId;
-    }
-
-    public QrtzTimedTask setTaskId(Long taskId) {
-        this.taskId = taskId;
-        return this;
-    }
 
     public String getTaskName() {
         return taskName;
@@ -96,11 +84,11 @@ public class QrtzTimedTask implements Serializable {
         return this;
     }
 
-    public String getStatus() {
+    public STATUS getStatus() {
         return status;
     }
 
-    public QrtzTimedTask setStatus(String state) {
+    public QrtzTimedTask setStatus(STATUS state) {
         this.status = state;
         return this;
     }
