@@ -1,4 +1,4 @@
-package com.quartz.config;
+package com.quartz.schedule;
 
 import org.quartz.DisallowConcurrentExecution;
 import org.quartz.PersistJobDataAfterExecution;

@@ -1,4 +1,4 @@
-package com.quartz.config;
+package com.quartz.schedule;
 
 import com.quartz.model.entity.QrtzTimedTask;
 import com.quartz.model.entity.QrtzTimedTaskParam;
