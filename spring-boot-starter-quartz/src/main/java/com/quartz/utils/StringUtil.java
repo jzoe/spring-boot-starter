@@ -33,6 +33,7 @@ public class StringUtil {
     public static String camelCaseName(String underscoreName) {
         StringBuilder result = new StringBuilder();
         if (underscoreName != null && underscoreName.length() > 0) {
+            underscoreName = underscoreName.toLowerCase();
             boolean flag = false;
             for (int i = 0; i < underscoreName.length(); i++) {
                 char ch = underscoreName.charAt(i);

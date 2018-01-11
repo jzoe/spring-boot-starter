@@ -6,7 +6,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcOperations;
 import org.springframework.test.context.junit4.SpringRunner;
 
@@ -23,8 +22,8 @@ public class QuartzApplicationTests {
 
     @Test
     public void test01() {
-        List<QrtzTimedTask> query = jdbcOperations.query("select * from qrtz_timed_task", new BeanPropertyRowMapper<>(QrtzTimedTask.class));
-        System.out.println(query);
+        List<QrtzTimedTask> qrtzTimedTaskList = quartzRepository.queryTaskAll();
+        System.out.println(qrtzTimedTaskList);
     }
 
     @Test
