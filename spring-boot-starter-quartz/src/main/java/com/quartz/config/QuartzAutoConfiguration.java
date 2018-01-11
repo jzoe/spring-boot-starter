@@ -89,7 +89,6 @@ public class QuartzAutoConfiguration implements BeanFactoryAware, EnvironmentAwa
                 beanDefinitionBuilder.addPropertyValue("arguments", new Object[]{params});
             }
             configurableBeanFactory.registerBeanDefinition(beanName, beanDefinitionBuilder
-//                    .addPropertyReference("applicationContext", applicationContext.getApplicationName())
                     .addPropertyValue("targetMethod", qrtzTimedTask.getTaskMethod())
                     .addPropertyValue("targetBean", targetObject)
                     .addPropertyValue("durable", quartzProperties.getDurability())
@@ -167,7 +166,8 @@ public class QuartzAutoConfiguration implements BeanFactoryAware, EnvironmentAwa
     @Bean
     public ScheduleUtil scheduleUtil(QuartzProperties quartzProperties,
                                      Scheduler scheduler) {
-        return new ScheduleUtil().setQuartzProperties(quartzProperties)
+        return new ScheduleUtil()  //
+                .setQuartzProperties(quartzProperties)  //
                 .setScheduler(scheduler);
     }
 
