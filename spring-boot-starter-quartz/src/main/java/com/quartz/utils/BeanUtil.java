@@ -263,5 +263,4 @@ public class BeanUtil {
         }
         return flag;
     }
-
 }

@@ -21,6 +21,8 @@ import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.EnvironmentAware;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -28,9 +30,9 @@ import org.springframework.core.annotation.Order;
 import org.springframework.core.env.Environment;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.jdbc.core.JdbcOperations;
+import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.quartz.CronTriggerFactoryBean;
 import org.springframework.scheduling.quartz.SchedulerFactoryBean;
-import org.springframework.stereotype.Component;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
@@ -47,15 +49,24 @@ import java.util.*;
  *         My blog： http://artislong.github.io
  */
 @Configuration
+@EnableScheduling
 @ConditionalOnBean(DataSource.class)
 @EnableConfigurationProperties(QuartzProperties.class)
-public class QuartzAutoConfiguration implements BeanFactoryAware, EnvironmentAware {
+public class QuartzAutoConfiguration implements BeanFactoryAware, EnvironmentAware, ApplicationContextAware {
 
     private static final Logger logger = LoggerFactory.getLogger(QuartzAutoConfiguration.class);
 
-    private static Map<String, QrtzTimedTask> taskExecutorMap = new LinkedHashMap<String, QrtzTimedTask>();
+    private Map<String, QrtzTimedTask> taskExecutorMap = new LinkedHashMap<String, QrtzTimedTask>();
     private BeanFactory beanFactory;
     private Environment environment;
+    private ApplicationContext applicationContext = null;
+
+    @Bean("defaultMethodInvokingJobDetailFactoryBean")
+    public BeanInvokingJobDetailFactoryBean jobDetailFactoryBean() {
+        BeanInvokingJobDetailFactoryBean beanInvokingJobDetailFactoryBean = new BeanInvokingJobDetailFactoryBean();
+        beanInvokingJobDetailFactoryBean.setApplicationContext(applicationContext);
+        return beanInvokingJobDetailFactoryBean;
+    }
 
     @Bean
     @Order(1)
@@ -76,6 +87,7 @@ public class QuartzAutoConfiguration implements BeanFactoryAware, EnvironmentAwa
                 beanDefinitionBuilder.addPropertyValue("arguments", new Object[]{params});
             }
             configurableBeanFactory.registerBeanDefinition(beanName, beanDefinitionBuilder
+//                    .addPropertyReference("applicationContext", applicationContext.getApplicationName())
                     .addPropertyValue("targetMethod", qrtzTimedTask.getTaskMethod())
                     .addPropertyValue("targetBean", targetObject)
                     .addPropertyValue("durable", quartzProperties.getDurability())
@@ -142,7 +154,7 @@ public class QuartzAutoConfiguration implements BeanFactoryAware, EnvironmentAwa
                                              JdbcOperations jdbcOperations,
                                              PlatformTransactionManager transactionManager) {
         Object tablePrefixObj = propertyPlaceholder.getProperty("org.quartz.jobStore.tablePrefix");
-        String tablePrefix =  ObjectUtils.isEmpty(tablePrefixObj) ? "qrtz_" : tablePrefixObj.toString();
+        String tablePrefix = ObjectUtils.isEmpty(tablePrefixObj) ? "qrtz_" : tablePrefixObj.toString();
         Object tableSuffixObj = propertyPlaceholder.getProperty("org.quartz.jobStore.tableSuffix");
         String tableSuffix = ObjectUtils.isEmpty(tableSuffixObj) ? "" : tableSuffixObj.toString();
         return new QuartzRepository(jdbcOperations, transactionManager) //
@@ -157,6 +169,14 @@ public class QuartzAutoConfiguration implements BeanFactoryAware, EnvironmentAwa
                 .setScheduler(scheduler);
     }
 
+    @Bean
+    public ScheduleRefresh scheduleRefresh(Scheduler scheduler, QuartzRepository quartzRepository) {
+        return new ScheduleRefresh()    //
+                .setScheduler(scheduler)    //
+                .setQuartzRepository(quartzRepository)  //
+                .setApplicationContext(applicationContext);
+    }
+
     @Override
     public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
         this.beanFactory = beanFactory;
@@ -165,6 +185,11 @@ public class QuartzAutoConfiguration implements BeanFactoryAware, EnvironmentAwa
     @Override
     public void setEnvironment(Environment environment) {
         this.environment = environment;
+    }
+
+    @Override
+    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+        this.applicationContext = applicationContext;
     }
 
     private Map<String, QrtzTimedTask> getTaskExecutors(QuartzRepository quartzRepository) {
@@ -260,7 +285,11 @@ public class QuartzAutoConfiguration implements BeanFactoryAware, EnvironmentAwa
         return map;
     }
 
-    @Component
+    @Bean
+    public DefaultScheduler defaultScheduler() {
+        return new DefaultScheduler();
+    }
+
     public static class DefaultScheduler {
         public void execute() {
         }
