@@ -26,7 +26,11 @@ compile('com.github.quartz:spring-boot-starter-quartz:1.0')
 脚本可在发布包的根目录中获得（task_oracle.sql）,Quartz集群的相关表
 可在Quartz的发布包org.quartz.impl.jdbcjobstore目录下找到相关SQL。
 
+【https://github.com/quartz-scheduler/quartz/blob/master/quartz-core/src/main/resources/org/quartz/impl/jdbcjobstore】
+
 - 任务配置表（QRTZ_TIMED_TASK）
+
+以下以Oracle的脚本为例
 
 ~~~sql
 -- Create table
@@ -75,6 +79,17 @@ alter table QRTZ_TIMED_TASK
   minextents 1
   maxextents unlimited
   );
+  
+CREATE INDEX IDX_TIMED_STATUS ON QRTZ_TIMED_TASK (STATUS)
+  PCTFREE 10
+  INITRANS 2
+  MAXTRANS 255
+  STORAGE (
+    INITIAL 64K
+    NEXT 1M
+    MINEXTENTS 1
+    MAXEXTENTS UNLIMITED
+  );
 ~~~
 
 - 任务参数配置表（QRTZ_TIMED_TASK_PARAM）
@@ -117,6 +132,17 @@ alter table QRTZ_TIMED_TASK_PARAM
   minextents 1
   maxextents unlimited
   );
+  
+CREATE INDEX IDX_TIMED_TASK_PARAM_NAME ON QRTZ_TIMED_TASK_PARAM (TASK_NAME)
+  PCTFREE 10
+  INITRANS 2
+  MAXTRANS 255
+  STORAGE (
+    INITIAL 64K
+    NEXT 1M
+    MINEXTENTS 1
+    MAXEXTENTS UNLIMITED
+  );
 ~~~
 
 ## 3、开发任务接口
@@ -125,7 +151,7 @@ alter table QRTZ_TIMED_TASK_PARAM
 
 - 任务接口需大写 I 开头，大写 SV 结尾
 - 接口实现类需去掉接口的 I 开头，然后在 SV 后加 Impl
-- 接口如需参数，必须为Map
+- 接口方法参数必须为Map
 - 接口无返回值
 
 如：
