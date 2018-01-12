@@ -32,7 +32,6 @@ compile('com.github.quartz:spring-boot-starter-quartz:1.0')
 -- Create table
 create table QRTZ_TIMED_TASK_TD
 (
-  task_id     INTEGER not null,
   task_name   VARCHAR2(200),
   task_desc   VARCHAR2(500),
   task_expres VARCHAR2(100),
@@ -41,15 +40,9 @@ create table QRTZ_TIMED_TASK_TD
   task_group  VARCHAR2(200) default 0,
   status      VARCHAR2(100) default 'U',
   create_time DATE default sysdate,
-  creater     VARCHAR2(200),
-  ext1        VARCHAR2(500),
-  ext2        VARCHAR2(500),
-  ext3        TIMESTAMP(6),
-  ext4        TIMESTAMP(6)
+  creater     VARCHAR2(200)
 );
 -- Add comments to the columns
-comment on column QRTZ_TIMED_TASK_TD.task_id
-is '任务编码';
 comment on column QRTZ_TIMED_TASK_TD.task_name
 is '任务名称';
 comment on column QRTZ_TIMED_TASK_TD.task_desc
@@ -68,30 +61,9 @@ comment on column QRTZ_TIMED_TASK_TD.create_time
 is '创建时间';
 comment on column QRTZ_TIMED_TASK_TD.creater
 is '创建人员';
-comment on column QRTZ_TIMED_TASK_TD.ext1
-is '扩展字段1';
-comment on column QRTZ_TIMED_TASK_TD.ext2
-is '扩展字段2';
-comment on column QRTZ_TIMED_TASK_TD.ext3
-is '扩展字段3';
-comment on column QRTZ_TIMED_TASK_TD.ext4
-is '扩展字段4';
 -- Create/Recreate primary, unique and foreign key constraints
 alter table QRTZ_TIMED_TASK_TD
-  add primary key (TASK_ID)
-  using index
-  pctfree 10
-  initrans 2
-  maxtrans 255
-  storage
-  (
-  initial 64K
-  next 1M
-  minextents 1
-  maxextents unlimited
-  );
-alter table QRTZ_TIMED_TASK_TD
-  add unique (TASK_NAME)
+  add primary key (TASK_NAME)
   using index
   pctfree 10
   initrans 2
@@ -111,7 +83,6 @@ alter table QRTZ_TIMED_TASK_TD
 -- Create table
 create table QRTZ_TIMED_TASK_PARAM_TD
 (
-  param_id    INTEGER not null,
   param_key   VARCHAR2(100) not null,
   param_value VARCHAR2(1000) not null,
   param_type  VARCHAR2(100),
@@ -120,8 +91,6 @@ create table QRTZ_TIMED_TASK_PARAM_TD
   sort_id     INTEGER
 );
 -- Add comments to the columns
-comment on column QRTZ_TIMED_TASK_PARAM_TD.param_id
-is '参数主键';
 comment on column QRTZ_TIMED_TASK_PARAM_TD.param_key
 is '参数代码';
 comment on column QRTZ_TIMED_TASK_PARAM_TD.param_value
@@ -136,7 +105,7 @@ comment on column QRTZ_TIMED_TASK_PARAM_TD.sort_id
 is '排序';
 -- Create/Recreate primary, unique and foreign key constraints
 alter table QRTZ_TIMED_TASK_PARAM_TD
-  add primary key (PARAM_ID)
+  add primary key (param_key,task_name)
   using index
   pctfree 10
   initrans 2

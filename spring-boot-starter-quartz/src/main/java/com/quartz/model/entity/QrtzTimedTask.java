@@ -20,13 +20,9 @@ public class QrtzTimedTask implements Serializable {
     private String taskClass;
     private String taskMethod;
     private String taskGroup;
-    private STATUS status = STATUS.VALID;
+    private STATUS status = STATUS.U;
     private Date createTime;
     private String creater;
-    private String ext1;
-    private String ext2;
-    private Date ext3;
-    private Date ext4;
 
     private List<QrtzTimedTaskParam> qrtzTimedTaskParams = new ArrayList<QrtzTimedTaskParam>();
 
@@ -88,8 +84,13 @@ public class QrtzTimedTask implements Serializable {
         return status;
     }
 
+    public QrtzTimedTask setStatus(String state) {
+        this.status = STATUS.valueOf(state);
+        return this;
+    }
+
     public QrtzTimedTask setStatus(STATUS state) {
-        this.status = state;
+        this.status = status;
         return this;
     }
 
@@ -99,42 +100,6 @@ public class QrtzTimedTask implements Serializable {
 
     public QrtzTimedTask setCreateTime(Date createTime) {
         this.createTime = createTime;
-        return this;
-    }
-
-    public String getExt1() {
-        return ext1;
-    }
-
-    public QrtzTimedTask setExt1(String ext1) {
-        this.ext1 = ext1;
-        return this;
-    }
-
-    public String getExt2() {
-        return ext2;
-    }
-
-    public QrtzTimedTask setExt2(String ext2) {
-        this.ext2 = ext2;
-        return this;
-    }
-
-    public Date getExt3() {
-        return ext3;
-    }
-
-    public QrtzTimedTask setExt3(Date ext3) {
-        this.ext3 = ext3;
-        return this;
-    }
-
-    public Date getExt4() {
-        return ext4;
-    }
-
-    public QrtzTimedTask setExt4(Date ext4) {
-        this.ext4 = ext4;
         return this;
     }
 
@@ -154,5 +119,19 @@ public class QrtzTimedTask implements Serializable {
     public QrtzTimedTask setQrtzTimedTaskParams(List<QrtzTimedTaskParam> qrtzTimedTaskParams) {
         this.qrtzTimedTaskParams.addAll(qrtzTimedTaskParams);
         return this;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        QrtzTimedTask that = (QrtzTimedTask) o;
+        return qrtzTimedTaskParams != null ? qrtzTimedTaskParams.equals(that.qrtzTimedTaskParams) : that.qrtzTimedTaskParams == null;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = qrtzTimedTaskParams != null ? qrtzTimedTaskParams.hashCode() : 0;
+        return result;
     }
 }

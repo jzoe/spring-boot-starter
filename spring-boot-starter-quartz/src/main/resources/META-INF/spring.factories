@@ -1,3 +1,4 @@
 # Auto Configure
-org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
-com.quartz.config.QuartzAutoConfiguration
+# org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+# com.quartz.config.QuartzBeanConfiguration
+# com.quartz.config.QuartzAutoConfiguration

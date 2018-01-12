@@ -70,4 +70,24 @@ public class QrtzTimedTaskParam implements Serializable {
         this.sortId = sortId;
         return this;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        QrtzTimedTaskParam that = (QrtzTimedTaskParam) o;
+        if (paramKey != null ? !paramKey.equals(that.paramKey) : that.paramKey != null) return false;
+        if (paramValue != null ? !paramValue.equals(that.paramValue) : that.paramValue != null) return false;
+        if (paramType != null ? !paramType.equals(that.paramType) : that.paramType != null) return false;
+        return sortId != null ? sortId.equals(that.sortId) : that.sortId == null;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = paramKey != null ? paramKey.hashCode() : 0;
+        result = 31 * result + (paramValue != null ? paramValue.hashCode() : 0);
+        result = 31 * result + (paramType != null ? paramType.hashCode() : 0);
+        result = 31 * result + (sortId != null ? sortId.hashCode() : 0);
+        return result;
+    }
 }

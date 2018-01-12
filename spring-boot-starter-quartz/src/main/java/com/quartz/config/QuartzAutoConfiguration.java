@@ -4,46 +4,35 @@ import com.quartz.PropertyPlaceholder;
 import com.quartz.jdbc.QuartzRepository;
 import com.quartz.model.assist.STATUS;
 import com.quartz.model.entity.QrtzTimedTask;
-import com.quartz.model.entity.QrtzTimedTaskParam;
 import com.quartz.schedule.ScheduleRefresh;
-import com.quartz.utils.BeanUtil;
-import com.quartz.utils.ClassUtil;
+import com.quartz.utils.QuartzUtil;
 import com.quartz.utils.ScheduleUtil;
-import com.quartz.utils.SpringContextUtils;
 import org.quartz.Scheduler;
 import org.quartz.Trigger;
 import org.quartz.TriggerKey;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.BeanFactory;
-import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.support.BeanDefinitionBuilder;
-import org.springframework.beans.factory.support.DefaultListableBeanFactory;
+import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
-import org.springframework.context.EnvironmentAware;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
-import org.springframework.core.env.Environment;
-import org.springframework.core.io.ClassPathResource;
-import org.springframework.jdbc.core.JdbcOperations;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.quartz.CronTriggerFactoryBean;
 import org.springframework.scheduling.quartz.SchedulerFactoryBean;
-import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.util.ObjectUtils;
-import org.springframework.util.StringUtils;
 
 import javax.annotation.Resource;
 import javax.sql.DataSource;
 import java.io.File;
 import java.io.FileInputStream;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Properties;
 
 /**
  * @author 陈敏
@@ -52,77 +41,39 @@ import java.util.*;
  */
 @Configuration
 @EnableScheduling
-@ConditionalOnBean(DataSource.class)
+@ConditionalOnBean(QuartzRepository.class)
+@AutoConfigureAfter(QuartzBeanConfiguration.class)
 @EnableConfigurationProperties(QuartzProperties.class)
-public class QuartzAutoConfiguration implements BeanFactoryAware, EnvironmentAware, ApplicationContextAware {
+public class QuartzAutoConfiguration implements ApplicationContextAware {
 
     private static final Logger logger = LoggerFactory.getLogger(QuartzAutoConfiguration.class);
 
-    private Map<String, QrtzTimedTask> taskExecutorMap = new LinkedHashMap<String, QrtzTimedTask>();
-    private BeanFactory beanFactory;
-    private Environment environment;
-    private ApplicationContext applicationContext = null;
-
-    @Bean("defaultMethodInvokingJobDetailFactoryBean")
-    public BeanInvokingJobDetailFactoryBean jobDetailFactoryBean() {
-        BeanInvokingJobDetailFactoryBean beanInvokingJobDetailFactoryBean = new BeanInvokingJobDetailFactoryBean();
-        beanInvokingJobDetailFactoryBean.setApplicationContext(applicationContext);
-        return beanInvokingJobDetailFactoryBean;
-    }
+    private ApplicationContext applicationContext;
+    private List<QrtzTimedTask> qrtzTimedTaskList = new ArrayList<QrtzTimedTask>();
 
     @Bean
-    @Order(1)
-    public List<BeanInvokingJobDetailFactoryBean> methodInvokingJobDetailFactoryBean(QuartzRepository quartzRepository,
-                                                                                     QuartzProperties quartzProperties) {
-        DefaultListableBeanFactory configurableBeanFactory = (DefaultListableBeanFactory) beanFactory;
-        taskExecutorMap.putAll(getTaskExecutors(quartzRepository));
-        for (String key : taskExecutorMap.keySet()) {
-            String beanName = key + "JobDetail";
-            QrtzTimedTask qrtzTimedTask = taskExecutorMap.get(key);
-            Map<String, Object> params = buildParams(qrtzTimedTask);
-            String targetObject = buildTargetObject(qrtzTimedTask);
-            BeanDefinitionBuilder beanDefinitionBuilder = BeanDefinitionBuilder.genericBeanDefinition(BeanInvokingJobDetailFactoryBean.class).setScope("prototype");
-            if (!ObjectUtils.isEmpty(qrtzTimedTask.getTaskGroup())) {
-                beanDefinitionBuilder.addPropertyValue("group", qrtzTimedTask.getTaskGroup());
-            }
-            if (!params.isEmpty()) {
-                beanDefinitionBuilder.addPropertyValue("arguments", new Object[]{params});
-            }
-            configurableBeanFactory.registerBeanDefinition(beanName, beanDefinitionBuilder
-                    .addPropertyValue("targetMethod", qrtzTimedTask.getTaskMethod())
-                    .addPropertyValue("targetBean", targetObject)
-                    .addPropertyValue("durable", quartzProperties.getDurability())
-                    .addPropertyValue("shouldRecover", quartzProperties.getShouldRecover())
-                    .addPropertyValue("volatility", quartzProperties.getVolatility())
-                    .addPropertyValue("concurrent", quartzProperties.getConcurrent())
-                    .getRawBeanDefinition());
-        }
-        return null;
-    }
-
-    @Bean
-    @Order(2)
-    public List<CronTriggerFactoryBean> cronTriggerFactoryBean() {
-        DefaultListableBeanFactory configurableBeanFactory = (DefaultListableBeanFactory) beanFactory;
-        for (String key : taskExecutorMap.keySet()) {
-            QrtzTimedTask qrtzTimedTask = taskExecutorMap.get(key);
-            configurableBeanFactory.registerBeanDefinition(key + "Trigger", BeanDefinitionBuilder.genericBeanDefinition(CronTriggerFactoryBean.class).setScope("prototype")
-                    .addPropertyReference("jobDetail", key + "JobDetail")
-                    .addPropertyValue("cronExpression", qrtzTimedTask.getTaskExpres())
-                    .getRawBeanDefinition());
-        }
+    @Resource
+    public List<BeanInvokingJobDetailFactoryBean> methodInvokingJobDetailFactoryBean(QuartzRepository quartzRepository) {
+        QuartzUtil.createJobDetailBeans(getTaskExecutors(quartzRepository));
         return null;
     }
 
     @Bean
     @Resource
-    @Order(3)
+    public List<CronTriggerFactoryBean> cronTriggerFactoryBean(QuartzRepository quartzRepository) {
+        QuartzUtil.createCronTriggerBeans(getTaskExecutors(quartzRepository));
+        return null;
+    }
+
+    @Bean
+    @Resource
+    @Order(Integer.MAX_VALUE)
     public SchedulerFactoryBean schedulerFactoryBean(DataSource dataSource,
                                                      QuartzProperties quartzProperties,
                                                      @Qualifier("quartzPlaceholder") PropertyPlaceholder quartzPlaceholder) {
         List<Trigger> triggers = new ArrayList<Trigger>();
-        for (String key : taskExecutorMap.keySet()) {
-            Trigger trigger = (Trigger) SpringContextUtils.getContext().getBean(key + "Trigger");
+        for (QrtzTimedTask qrtzTimedTask : qrtzTimedTaskList) {
+            Trigger trigger = (Trigger) applicationContext.getBean(qrtzTimedTask.getTaskName() + "Trigger");
             triggers.add(trigger);
         }
         SchedulerFactoryBean schedulerFactoryBean = new SchedulerFactoryBean();
@@ -142,36 +93,14 @@ public class QuartzAutoConfiguration implements BeanFactoryAware, EnvironmentAwa
     }
 
     @Bean
-    @Qualifier("quartzPlaceholder")
-    @Order(0)
-    public PropertyPlaceholder propertyPlaceholder() {
-        PropertyPlaceholder propertyPlaceholder = new PropertyPlaceholder();
-        propertyPlaceholder.setLocation(new ClassPathResource("quartz.properties"));
-        return propertyPlaceholder;
-    }
-
-    @Bean
-    public QuartzRepository quartzRepository(PropertyPlaceholder propertyPlaceholder,
-                                             JdbcOperations jdbcOperations,
-                                             PlatformTransactionManager transactionManager) {
-        Object tablePrefixObj = propertyPlaceholder.getProperty("org.quartz.jobStore.tablePrefix");
-        String tablePrefix = ObjectUtils.isEmpty(tablePrefixObj) ? "qrtz_" : tablePrefixObj.toString();
-        Object tableSuffixObj = propertyPlaceholder.getProperty("org.quartz.jobStore.tableSuffix");
-        String tableSuffix = ObjectUtils.isEmpty(tableSuffixObj) ? "" : tableSuffixObj.toString();
-        return new QuartzRepository(jdbcOperations, transactionManager) //
-                .setTablePrefix(tablePrefix)    //
-                .setTableSuffix(tableSuffix);
-    }
-
-    @Bean
-    public ScheduleUtil scheduleUtil(QuartzProperties quartzProperties,
-                                     Scheduler scheduler) {
+    public ScheduleUtil scheduleUtil(QuartzProperties quartzProperties, Scheduler scheduler) {
         return new ScheduleUtil()  //
                 .setQuartzProperties(quartzProperties)  //
                 .setScheduler(scheduler);
     }
 
     @Bean
+    @Resource
     public ScheduleRefresh scheduleRefresh(Scheduler scheduler, QuartzRepository quartzRepository) {
         return new ScheduleRefresh()    //
                 .setScheduler(scheduler)    //
@@ -180,69 +109,19 @@ public class QuartzAutoConfiguration implements BeanFactoryAware, EnvironmentAwa
     }
 
     @Override
-    public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
-        this.beanFactory = beanFactory;
-    }
-
-    @Override
-    public void setEnvironment(Environment environment) {
-        this.environment = environment;
-    }
-
-    @Override
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
         this.applicationContext = applicationContext;
     }
 
-    private Map<String, QrtzTimedTask> getTaskExecutors(QuartzRepository quartzRepository) {
-        Map<String, QrtzTimedTask> taskExecutorMap = new LinkedHashMap<String, QrtzTimedTask>();
-        List<QrtzTimedTask> qrtzTimedTasks = quartzRepository.queryValidTask(STATUS.VALID);
-        for (QrtzTimedTask qrtzTimedTask : qrtzTimedTasks) {
-            List<QrtzTimedTaskParam> taskParamTds = quartzRepository.queryTaskParam(qrtzTimedTask.getTaskName());
-            qrtzTimedTask.setQrtzTimedTaskParams(taskParamTds);
-            taskExecutorMap.put(qrtzTimedTask.getTaskName(), qrtzTimedTask);
+    private List<QrtzTimedTask> getTaskExecutors(QuartzRepository quartzRepository) {
+        List<QrtzTimedTask> qrtzTimedTasks = quartzRepository.queryValidTaskAndParam(STATUS.U);
+        if (qrtzTimedTasks.isEmpty()) {
+            qrtzTimedTasks.addAll(getDefaultTask());
         }
-        if (taskExecutorMap.isEmpty()) {
-            return getDefaultTask();
-        }
-        return taskExecutorMap;
+        qrtzTimedTaskList.addAll(qrtzTimedTasks);
+        return qrtzTimedTasks;
     }
 
-    private Map<String, Object> buildParams(QrtzTimedTask qrtzTimedTask) {
-        Map<String, Object> param = new LinkedHashMap<String, Object>();
-        List<QrtzTimedTaskParam> taskParams = qrtzTimedTask.getQrtzTimedTaskParams();
-        if (!taskParams.isEmpty()) {
-            for (QrtzTimedTaskParam taskParam : taskParams) {
-                String paramKey = taskParam.getParamKey();
-                String paramValue = taskParam.getParamValue();
-                String paramType = taskParam.getParamType();
-                Object value = paramValue;
-                if (!StringUtils.isEmpty(paramType)) {
-                    value = BeanUtil.getPrimitiveValue(paramValue, paramType);
-                }
-                param.put(paramKey, value);
-            }
-        }
-        return param;
-    }
-
-    private String buildTargetObject(QrtzTimedTask qrtzTimedTask) {
-        String taskInterFace = qrtzTimedTask.getTaskClass();
-        int tag = taskInterFace.lastIndexOf(".");
-        String beanName = null;
-        if (tag > 0) {
-            String interFaceName = taskInterFace.substring(tag + 1);
-            if (interFaceName.startsWith("I") && interFaceName.endsWith("SV")) {
-                String taskImpl = interFaceName.substring(interFaceName.indexOf("I") + 1) + "Impl";
-                beanName = ClassUtil.getClassName(taskImpl);
-            } else {
-                beanName = ClassUtil.getClassName(interFaceName);
-            }
-        } else {
-            beanName = taskInterFace;
-        }
-        return beanName;
-    }
 
     private static Properties quartzProperties() {
         Properties properties = new Properties();
@@ -273,18 +152,17 @@ public class QuartzAutoConfiguration implements BeanFactoryAware, EnvironmentAwa
         return properties;
     }
 
-    private Map<String, QrtzTimedTask> getDefaultTask() {
-        Map<String, QrtzTimedTask> map = new LinkedHashMap<String, QrtzTimedTask>();
+    private List<QrtzTimedTask> getDefaultTask() {
+        List<QrtzTimedTask> defaultTask = new ArrayList<QrtzTimedTask>();
         String defaultScheduler = "defaultScheduler";
-        map.put(defaultScheduler, new QrtzTimedTask()
+        defaultTask.add(new QrtzTimedTask()
                 .setTaskName(defaultScheduler)
                 .setTaskClass("com.quartz.config.QuartzAutoConfiguration.DefaultScheduler")
                 .setTaskExpres("0 0 4 ? * *")
                 .setTaskMethod("execute")
                 .setTaskDesc("default scheduler")
-                .setTaskGroup(TriggerKey.DEFAULT_GROUP)
-        );
-        return map;
+                .setTaskGroup(TriggerKey.DEFAULT_GROUP));
+        return defaultTask;
     }
 
     @Bean

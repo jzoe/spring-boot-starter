@@ -1,7 +1,7 @@
 package com.quartz.schedule;
 
 import com.quartz.config.QuartzAutoConfiguration;
-import org.springframework.boot.autoconfigure.AutoConfigurationPackage;
+import com.quartz.config.QuartzBeanConfiguration;
 import org.springframework.context.annotation.Import;
 
 import java.lang.annotation.*;
@@ -9,12 +9,6 @@ import java.lang.annotation.*;
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
-@Inherited
-@AutoConfigurationPackage
-@Import(QuartzAutoConfiguration.class)
+@Import({QuartzBeanConfiguration.class, QuartzAutoConfiguration.class})
 public @interface EnableQuartz {
-
-    Class<?>[] exclude() default {};
-
-    String[] excludeName() default {};
 }
