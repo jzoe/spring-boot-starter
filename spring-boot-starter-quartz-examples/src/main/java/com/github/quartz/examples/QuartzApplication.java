@@ -1,11 +1,11 @@
 package com.github.quartz.examples;
 
-import org.quartz.Scheduler;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.quartz.schedule.EnableQuartz;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
+@EnableQuartz
 public class QuartzApplication {
 
     public static void main(String[] args) {
