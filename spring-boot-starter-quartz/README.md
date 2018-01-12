@@ -1,7 +1,7 @@
 # spring-boot-starter-quartz
 
 针对公司业务要求，对quartz做了简单的封装，使任务定义简单化，支持相同任务实现，
-做不同任务执行，同时支持表配置传参功能。以下是在项目中具体使用方法:
+做不同任务执行，同时支持表配置传参功能，动态更新任务，新增任务，删除任务。以下是在项目中具体使用方法:
 
 ## 1、导入spring-boot-starter-quartz包
 
@@ -26,11 +26,11 @@ compile('com.github.quartz:spring-boot-starter-quartz:1.0')
 脚本可在发布包的根目录中获得（task_oracle.sql）,Quartz集群的相关表
 可在Quartz的发布包org.quartz.impl.jdbcjobstore目录下找到相关SQL。
 
-- 任务配置表（QRTZ_TIMED_TASK_TD）
+- 任务配置表（QRTZ_TIMED_TASK）
 
 ~~~sql
 -- Create table
-create table QRTZ_TIMED_TASK_TD
+create table QRTZ_TIMED_TASK
 (
   task_name   VARCHAR2(200),
   task_desc   VARCHAR2(500),
@@ -43,26 +43,26 @@ create table QRTZ_TIMED_TASK_TD
   creater     VARCHAR2(200)
 );
 -- Add comments to the columns
-comment on column QRTZ_TIMED_TASK_TD.task_name
+comment on column QRTZ_TIMED_TASK.task_name
 is '任务名称';
-comment on column QRTZ_TIMED_TASK_TD.task_desc
+comment on column QRTZ_TIMED_TASK.task_desc
 is '任务描述';
-comment on column QRTZ_TIMED_TASK_TD.task_expres
+comment on column QRTZ_TIMED_TASK.task_expres
 is '任务执行表达式';
-comment on column QRTZ_TIMED_TASK_TD.task_method
+comment on column QRTZ_TIMED_TASK.task_method
 is '任务执行方法';
-comment on column QRTZ_TIMED_TASK_TD.task_class
+comment on column QRTZ_TIMED_TASK.task_class
 is '任务接口路径';
-comment on column QRTZ_TIMED_TASK_TD.task_group
+comment on column QRTZ_TIMED_TASK.task_group
 is '任务分组';
-comment on column QRTZ_TIMED_TASK_TD.status
+comment on column QRTZ_TIMED_TASK.status
 is '任务状态';
-comment on column QRTZ_TIMED_TASK_TD.create_time
+comment on column QRTZ_TIMED_TASK.create_time
 is '创建时间';
-comment on column QRTZ_TIMED_TASK_TD.creater
+comment on column QRTZ_TIMED_TASK.creater
 is '创建人员';
 -- Create/Recreate primary, unique and foreign key constraints
-alter table QRTZ_TIMED_TASK_TD
+alter table QRTZ_TIMED_TASK
   add primary key (TASK_NAME)
   using index
   pctfree 10
@@ -77,11 +77,11 @@ alter table QRTZ_TIMED_TASK_TD
   );
 ~~~
 
-- 任务参数配置表（QRTZ_TIMED_TASK_PARAM_TD）
+- 任务参数配置表（QRTZ_TIMED_TASK_PARAM）
 
 ~~~sql
 -- Create table
-create table QRTZ_TIMED_TASK_PARAM_TD
+create table QRTZ_TIMED_TASK_PARAM
 (
   param_key   VARCHAR2(100) not null,
   param_value VARCHAR2(1000) not null,
@@ -91,20 +91,20 @@ create table QRTZ_TIMED_TASK_PARAM_TD
   sort_id     INTEGER
 );
 -- Add comments to the columns
-comment on column QRTZ_TIMED_TASK_PARAM_TD.param_key
+comment on column QRTZ_TIMED_TASK_PARAM.param_key
 is '参数代码';
-comment on column QRTZ_TIMED_TASK_PARAM_TD.param_value
+comment on column QRTZ_TIMED_TASK_PARAM.param_value
 is '参数值';
-comment on column QRTZ_TIMED_TASK_PARAM_TD.param_type
+comment on column QRTZ_TIMED_TASK_PARAM.param_type
 is '参数类型(不填默认为String类型)';
-comment on column QRTZ_TIMED_TASK_PARAM_TD.param_desc
+comment on column QRTZ_TIMED_TASK_PARAM.param_desc
 is '参数描述';
-comment on column QRTZ_TIMED_TASK_PARAM_TD.task_name
+comment on column QRTZ_TIMED_TASK_PARAM.task_name
 is '任务名称';
-comment on column QRTZ_TIMED_TASK_PARAM_TD.sort_id
+comment on column QRTZ_TIMED_TASK_PARAM.sort_id
 is '排序';
 -- Create/Recreate primary, unique and foreign key constraints
-alter table QRTZ_TIMED_TASK_PARAM_TD
+alter table QRTZ_TIMED_TASK_PARAM
   add primary key (param_key,task_name)
   using index
   pctfree 10
@@ -154,15 +154,37 @@ public class HelloSVImpl implements IHelloSV {
 如：
 
 ~~~sql
-INSERT INTO QRTZ_TIMED_TASK_TD (TASK_ID, TASK_NAME, TASK_DESC, TASK_EXPRES, TASK_METHOD, TASK_CLASS, TASK_GROUP, STATUS, CREATE_TIME, CREATER, EXT1, EXT2, EXT3, EXT4)
-VALUES (1, 'hello1', '测试1', '0/10 * * * * ?', 'hello', 'com.IHelloSV', 'hello', 'U', sysdate, null, null, null, null, null);
-INSERT INTO QRTZ_TIMED_TASK_TD (TASK_ID, TASK_NAME, TASK_DESC, TASK_EXPRES, TASK_METHOD, TASK_CLASS, TASK_GROUP, STATUS, CREATE_TIME, CREATER, EXT1, EXT2, EXT3, EXT4)
-VALUES (2, 'hello2', '测试2', '0/10 * * * * ?', 'hello', 'com.IHelloSV', 'hello', 'U', sysdate, null, null, null, null, null);
-INSERT INTO QRTZ_TIMED_TASK_PARAM_TD (PARAM_ID, PARAM_KEY, PARAM_VALUE, PARAM_TYPE, PARAM_DESC, TASK_NAME)
-VALUES (1, 'name', 'admin', null, '测试参数', 'hello2');
+INSERT INTO QRTZ_TIMED_TASK (TASK_NAME, TASK_DESC, TASK_EXPRES, TASK_METHOD, TASK_CLASS, TASK_GROUP, STATUS, CREATE_TIME, CREATER)
+VALUES ('hello1', '测试1', '0/10 * * * * ?', 'hello', 'com.IHelloSV', 'hello', 'U', sysdate, null);
+INSERT INTO QRTZ_TIMED_TASK (TASK_NAME, TASK_DESC, TASK_EXPRES, TASK_METHOD, TASK_CLASS, TASK_GROUP, STATUS, CREATE_TIME, CREATER)
+VALUES ('hello2', '测试2', '0/10 * * * * ?', 'hello', 'com.IHelloSV', 'hello', 'U', sysdate, null);
+INSERT INTO QRTZ_TIMED_TASK_PARAM (PARAM_KEY, PARAM_VALUE, PARAM_TYPE, PARAM_DESC, TASK_NAME)
+VALUES ('name', 'admin', null, '测试参数', 'hello2');
 ~~~
 
 ## 5、quartz配置
 
 此项目默认采用quartz集群方式。具体配置可在发布包根目录下的quartz.properties中查看。
 如需自定义配置，可在自己项目的classpath下新建quartz.properties文件进行配置。
+
+## 6、任务动态更新
+
+- 新增任务
+
+在QRTZ_TIMED_TASK表中新增任务配置之后，将STATUS字段改为S即可。
+
+- 删除任务
+
+将QRTZ_TIMED_TASK表要删除的数据的STATUS字段改为D即可。
+
+- 修改任务
+
+任务只支持修改以下几项：
+
+QRTZ_TIMED_TASK.TASK_EXPRES,
+QRTZ_TIMED_TASK_PARAM.PARAM_KEY,
+QRTZ_TIMED_TASK_PARAM.PARAM_VALUE,
+QRTZ_TIMED_TASK_PARAM.PARAM_TYPE,
+QRTZ_TIMED_TASK_PARAM.PARAM_DESC,
+
+其中，当只修改了QRTZ_TIMED_TASK时，只有TASK_EXPRES生效；修改了QRTZ_TIMED_TASK_PARAM配置之后，QRTZ_TIMED_TASK的其他配置都是可以修改的。
