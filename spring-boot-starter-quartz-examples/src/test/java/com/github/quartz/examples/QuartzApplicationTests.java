@@ -1,7 +1,7 @@
 package com.github.quartz.examples;
 
-import com.quartz.jdbc.QuartzRepository;
-import com.quartz.model.entity.QrtzTimedTask;
+import com.github.quartz.jdbc.QuartzRepository;
+import com.github.quartz.model.entity.QrtzTimedTask;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;

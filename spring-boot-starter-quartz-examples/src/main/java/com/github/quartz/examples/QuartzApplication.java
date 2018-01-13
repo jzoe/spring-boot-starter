@@ -1,6 +1,6 @@
 package com.github.quartz.examples;
 
-import com.quartz.schedule.EnableQuartz;
+import com.github.quartz.schedule.EnableQuartz;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
