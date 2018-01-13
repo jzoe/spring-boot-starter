@@ -48,6 +48,8 @@
         <spring.version>4.3.4.RELEASE</spring.version>
         <quartz.version>2.2.3</quartz.version>
         <lombok.version>1.16.18</lombok.version>
+        <fastjson.version>1.2.34</fastjson.version>
+        <httpclient.version>4.5.3</httpclient.version>
     </properties>
 
     <dependencies>
@@ -84,12 +86,39 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-jdbc</artifactId>
             <version>${spring-boot.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-api</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <version>${lombok.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+            <version>${spring-boot.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.alibaba</groupId>
+            <artifactId>fastjson</artifactId>
+            <version>${fastjson.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpclient</artifactId>
+            <version>${httpclient.version}</version>
+        </dependency>
+        <!--<dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpcomponents-client</artifactId>
+            <version>${httpclient.version}</version>
+        </dependency>-->
     </dependencies>
 
     <build>
@@ -102,6 +131,7 @@
                     <encoding>UTF-8</encoding>
                 </configuration>
             </plugin>
+            <!-- 打包jar包时将源码打包 -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-source-plugin</artifactId>

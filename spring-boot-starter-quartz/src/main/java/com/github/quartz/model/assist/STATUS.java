@@ -1,0 +1,1 @@
+package com.github.quartz.model.assist;public enum STATUS {    U("U"),    E("E"),    D("D"),    S("S");    private String value;    STATUS(String value) {        this.value = value;    }    public String getValue() {        return value;    }    public STATUS setValue(String value) {        return valueOf(value);    }}

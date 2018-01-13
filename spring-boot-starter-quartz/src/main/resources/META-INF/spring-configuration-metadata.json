@@ -2,60 +2,92 @@
   "hints": [],
   "groups": [
     {
-      "sourceType": "com.quartz.config.QuartzProperties",
+      "sourceType": "com.github.quartz.config.QuartzProperties",
       "name": "quartz",
-      "type": "com.quartz.config.QuartzProperties"
+      "type": "com.github.quartz.config.QuartzProperties"
+    },
+    {
+      "sourceType": "com.github.quartz.config.QuartzRestTemplateProperties",
+      "name": "quartzTemplate",
+      "type": "com.github.quartz.config.QuartzRestTemplateProperties"
     }
   ],
   "properties": [
     {
-      "sourceType": "com.quartz.config.QuartzProperties",
+      "sourceType": "com.github.quartz.config.QuartzProperties",
       "defaultValue": "true",
       "name": "quartz.overwriteExistingJobs",
       "description": "是否覆盖已经存在的任务",
       "type": "java.lang.Boolean"
     },
     {
-      "sourceType": "com.quartz.config.QuartzProperties",
+      "sourceType": "com.github.quartz.config.QuartzProperties",
       "defaultValue": "10",
       "name": "quartz.startupDelay",
       "description": "应用启动后几秒再启动任务",
       "type": "java.lang.Integer"
     },
     {
-      "sourceType": "com.quartz.config.QuartzProperties",
+      "sourceType": "com.github.quartz.config.QuartzProperties",
       "defaultValue": "true",
       "name": "quartz.autoStartup",
       "description": "是否自动启动",
       "type": "java.lang.Boolean"
     },
     {
-      "sourceType": "com.quartz.config.QuartzProperties",
+      "sourceType": "com.github.quartz.config.QuartzProperties",
       "defaultValue": "false",
       "name": "quartz.concurrent",
       "description": "是否允许任务并发执行",
       "type": "java.lang.Boolean"
     },
     {
-      "sourceType": "com.quartz.config.QuartzProperties",
+      "sourceType": "com.github.quartz.config.QuartzProperties",
       "defaultValue": "false",
       "name": "quartz.durability",
       "description": "任务完成之后是否依然保留到数据库",
       "type": "java.lang.Boolean"
     },
     {
-      "sourceType": "com.quartz.config.QuartzProperties",
+      "sourceType": "com.github.quartz.config.QuartzProperties",
       "defaultValue": "false",
       "name": "quartz.volatility",
       "description": "重启应用之后是否删除任务的相关信息",
       "type": "java.lang.Boolean"
     },
     {
-      "sourceType": "com.quartz.config.QuartzProperties",
+      "sourceType": "com.github.quartz.config.QuartzProperties",
       "defaultValue": "false",
       "name": "quartz.shouldRecover",
       "description": "应用重启之后时候忽略过期任务",
       "type": "java.lang.Boolean"
+    },
+    {
+      "sourceType": "com.github.quartz.config.QuartzRestTemplateProperties",
+      "defaultValue": "5000",
+      "name": "quartzTemplate.readTimeout",
+      "description": "restTemplate读超时时间",
+      "type": "java.lang.Integer"
+    },
+    {
+      "sourceType": "com.github.quartz.config.QuartzRestTemplateProperties",
+      "defaultValue": "5000",
+      "name": "quartzTemplate.connectTimeout",
+      "description": "restTemplate连接超时时间",
+      "type": "java.lang.Integer"
+    },
+    {
+      "sourceType": "com.github.quartz.config.QuartzRestTemplateProperties",
+      "defaultValue":"/fisTask/quartz",
+      "name": "quartzTemplate.api",
+      "description": "restTemplate连接超时时间",
+      "type": "java.lang.String"
+    },
+    {
+      "sourceType": "com.github.quartz.config.QuartzRestTemplateProperties",
+      "name": "quartzTemplate.uris",
+      "description": "restTemplate连接的IP地址",
+      "type": "java.util.List<java.lang.String>"
     }
   ]
 }
