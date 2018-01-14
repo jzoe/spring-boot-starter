@@ -1,6 +1,6 @@
 package com.github.quartz.model.entity;
 
-import com.github.quartz.model.assist.STATUS;
+import com.github.quartz.model.assist.QrtzStatus;
 import org.quartz.TriggerKey;
 
 import java.io.Serializable;
@@ -21,7 +21,7 @@ public class QrtzTimedTask implements Serializable {
     private String taskClass;
     private String taskMethod;
     private String taskGroup = TriggerKey.DEFAULT_GROUP;
-    private STATUS status = STATUS.U;
+    private QrtzStatus status = QrtzStatus.U;
     private Date createTime;
     private String creater;
 
@@ -81,16 +81,16 @@ public class QrtzTimedTask implements Serializable {
         return this;
     }
 
-    public STATUS getStatus() {
+    public QrtzStatus getStatus() {
         return status;
     }
 
     public QrtzTimedTask setStatus(String state) {
-        this.status = STATUS.valueOf(state);
+        this.status = QrtzStatus.valueOf(state);
         return this;
     }
 
-    public QrtzTimedTask setStatus(STATUS state) {
+    public QrtzTimedTask setStatus(QrtzStatus state) {
         this.status = status;
         return this;
     }

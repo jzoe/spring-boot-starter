@@ -1,9 +1,12 @@
 package com.github.quartz.config;
 
 import com.github.quartz.PropertyPlaceholder;
+import com.github.quartz.http.ScheduleExecutor;
+import com.github.quartz.http.ScheduleExecutorImpl;
 import com.github.quartz.jdbc.QuartzRepository;
-import com.github.quartz.model.assist.STATUS;
+import com.github.quartz.model.assist.QrtzStatus;
 import com.github.quartz.model.entity.QrtzTimedTask;
+import com.github.quartz.schedule.QuartzInit;
 import com.github.quartz.schedule.ScheduleRefresh;
 import com.github.quartz.utils.QuartzUtil;
 import com.github.quartz.utils.ScheduleUtil;
@@ -13,6 +16,8 @@ import org.quartz.TriggerKey;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
@@ -43,13 +48,14 @@ import java.util.Properties;
 @ConditionalOnBean(QuartzRepository.class)
 @AutoConfigureAfter(QuartzBeanConfiguration.class)
 @EnableConfigurationProperties(QuartzProperties.class)
-public class QuartzAutoConfiguration implements ApplicationContextAware {
+public class QuartzAutoConfiguration implements BeanFactoryAware, ApplicationContextAware {
 
     private static final Logger logger = LoggerFactory.getLogger(QuartzAutoConfiguration.class);
 
     private ApplicationContext applicationContext;
     private List<QrtzTimedTask> qrtzTimedTaskList = new ArrayList<QrtzTimedTask>();
     private boolean isStart;
+    private BeanFactory beanFactory;
 
     public QuartzAutoConfiguration(QuartzProperties quartzProperties) {
         isStart = QuartzUtil.quartzIsStart(quartzProperties);
@@ -118,13 +124,40 @@ public class QuartzAutoConfiguration implements ApplicationContextAware {
                 .setApplicationContext(applicationContext);
     }
 
+    @Bean
+    public ScheduleExecutor scheduleExecutor(Scheduler scheduler, QuartzRepository quartzRepository) {
+        return new ScheduleExecutorImpl()
+                .setApplicationContext(applicationContext)
+                .setScheduler(scheduler);
+    }
+
+    @Bean
+    public QuartzUtil quartzUtil(QuartzProperties quartzProperties, QuartzRepository quartzRepository) {
+        return new QuartzUtil()
+                .setConfigurableBeanFactory(beanFactory)
+                .setQuartzProperties(quartzProperties)
+                .setApplicationContext(applicationContext)
+                .setQuartzRepository(quartzRepository);
+    }
+
+    @Bean
+    @Resource
+    public QuartzInit quartzCleanner(QuartzProperties quartzProperties, DataSource dataSource) {
+        return new QuartzInit(quartzProperties, dataSource).setSql("cleanTask.sql");
+    }
+
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
         this.applicationContext = applicationContext;
     }
 
+    @Override
+    public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
+        this.beanFactory = beanFactory;
+    }
+
     private List<QrtzTimedTask> getTaskExecutors(QuartzRepository quartzRepository) {
-        List<QrtzTimedTask> qrtzTimedTasks = quartzRepository.queryValidTaskAndParam(STATUS.U);
+        List<QrtzTimedTask> qrtzTimedTasks = quartzRepository.queryValidTaskAndParam(QrtzStatus.U);
         if (qrtzTimedTasks.isEmpty()) {
             qrtzTimedTasks.addAll(getDefaultTask());
         }

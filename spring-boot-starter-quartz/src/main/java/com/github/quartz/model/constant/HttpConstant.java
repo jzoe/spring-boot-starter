@@ -1,0 +1,1 @@
+package com.github.quartz.model.constant;/** * @DESCRIPTION: Http请求常量 * @AUTHER: chenmin * @CREATE BY: 18/1/14 下午10:40 */public class HttpConstant {    public static final String QUARTZ_API = "/schedule";    public static final String QUARTZ_DATA = "DATA";    public static final String QUARTZ_METHOD = "METHOD";}
