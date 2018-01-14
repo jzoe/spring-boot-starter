@@ -2,6 +2,9 @@ package com.github.quartz.config;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * @author 陈敏
  * Create date ：2017/10/19.
@@ -17,6 +20,7 @@ public class QuartzProperties {
     private Boolean durability;
     private Boolean volatility;
     private Boolean shouldRecover;
+    private List<String> excludeServers = new ArrayList<String>();
 
     public Boolean getOverwriteExistingJobs() {
         return overwriteExistingJobs;
@@ -72,5 +76,13 @@ public class QuartzProperties {
 
     public void setShouldRecover(Boolean shouldRecover) {
         this.shouldRecover = shouldRecover;
+    }
+
+    public List<String> getExcludeServers() {
+        return excludeServers;
+    }
+
+    public void setExcludeServers(List<String> excludeServers) {
+        this.excludeServers = excludeServers;
     }
 }

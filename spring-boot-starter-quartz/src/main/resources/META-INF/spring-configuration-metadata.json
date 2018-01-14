@@ -63,6 +63,12 @@
       "type": "java.lang.Boolean"
     },
     {
+      "sourceType":"com.github.quartz.config.QuartzProperties",
+      "name":"quartz.excludeServers",
+      "description": "排除不需要启动的服务器",
+      "type":"java.util.List<java.lang.String>"
+    },
+    {
       "sourceType": "com.github.quartz.config.QuartzRestTemplateProperties",
       "defaultValue": "5000",
       "name": "quartzTemplate.readTimeout",

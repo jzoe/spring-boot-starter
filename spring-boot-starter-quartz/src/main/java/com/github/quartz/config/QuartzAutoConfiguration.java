@@ -13,8 +13,6 @@ import org.quartz.TriggerKey;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.BeanFactory;
-import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
@@ -45,25 +43,33 @@ import java.util.Properties;
 @ConditionalOnBean(QuartzRepository.class)
 @AutoConfigureAfter(QuartzBeanConfiguration.class)
 @EnableConfigurationProperties(QuartzProperties.class)
-public class QuartzAutoConfiguration implements ApplicationContextAware, BeanFactoryAware {
+public class QuartzAutoConfiguration implements ApplicationContextAware {
 
     private static final Logger logger = LoggerFactory.getLogger(QuartzAutoConfiguration.class);
 
     private ApplicationContext applicationContext;
-    private BeanFactory beanFactory;
     private List<QrtzTimedTask> qrtzTimedTaskList = new ArrayList<QrtzTimedTask>();
+    private boolean isStart;
+
+    public QuartzAutoConfiguration(QuartzProperties quartzProperties) {
+        isStart = QuartzUtil.quartzIsStart(quartzProperties);
+    }
 
     @Bean
     @Resource
-    public List<BeanInvokingJobDetailFactoryBean> methodInvokingJobDetailFactoryBean(QuartzRepository quartzRepository) {
-        QuartzUtil.createJobDetailBeans(getTaskExecutors(quartzRepository));
+    public List<BeanInvokingJobDetailFactoryBean> methodInvokingJobDetailFactoryBean(QuartzRepository quartzRepository, QuartzProperties quartzProperties) {
+        if (isStart) {
+            QuartzUtil.createJobDetailBeans(getTaskExecutors(quartzRepository));
+        }
         return null;
     }
 
     @Bean
     @Resource
-    public List<CronTriggerFactoryBean> cronTriggerFactoryBean(QuartzRepository quartzRepository) {
-        QuartzUtil.createCronTriggerBeans(getTaskExecutors(quartzRepository));
+    public List<CronTriggerFactoryBean> cronTriggerFactoryBean(QuartzRepository quartzRepository, QuartzProperties quartzProperties) {
+        if (isStart) {
+            QuartzUtil.createCronTriggerBeans(getTaskExecutors(quartzRepository));
+        }
         return null;
     }
 
@@ -72,6 +78,9 @@ public class QuartzAutoConfiguration implements ApplicationContextAware, BeanFac
     public SchedulerFactoryBean schedulerFactoryBean(DataSource dataSource,
                                                      QuartzProperties quartzProperties,
                                                      @Qualifier("quartzPlaceholder") PropertyPlaceholder quartzPlaceholder) {
+        if (!isStart) {
+            return null;
+        }
         List<Trigger> triggers = new ArrayList<Trigger>();
         for (QrtzTimedTask qrtzTimedTask : qrtzTimedTaskList) {
             Trigger trigger = (Trigger) applicationContext.getBean(qrtzTimedTask.getTaskName() + "Trigger");
@@ -112,11 +121,6 @@ public class QuartzAutoConfiguration implements ApplicationContextAware, BeanFac
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
         this.applicationContext = applicationContext;
-    }
-
-    @Override
-    public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
-        this.beanFactory = beanFactory;
     }
 
     private List<QrtzTimedTask> getTaskExecutors(QuartzRepository quartzRepository) {
