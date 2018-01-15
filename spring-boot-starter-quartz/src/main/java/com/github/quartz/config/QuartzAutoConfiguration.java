@@ -91,11 +91,13 @@ public class QuartzAutoConfiguration implements BeanFactoryAware, ApplicationCon
         }
         schedulerFactoryBean.setQuartzProperties(properties);
         // 用于quartz集群,QuartzScheduler 启动时更新己存在的Job，这样就不用每次修改targetObject后删除qrtz_job_details表对应记录了
-        schedulerFactoryBean.setOverwriteExistingJobs(quartzProperties.getOverwriteExistingJobs());
+        if (quartzProperties.getCluster()) {
+            schedulerFactoryBean.setOverwriteExistingJobs(quartzProperties.getOverwriteExistingJobs());
+            schedulerFactoryBean.setDataSource(dataSource);
+        }
         // QuartzScheduler 延时启动，应用启动完10秒后 QuartzScheduler 再启动
         schedulerFactoryBean.setStartupDelay(quartzProperties.getStartupDelay());
         schedulerFactoryBean.setAutoStartup(quartzProperties.getAutoStartup());
-        schedulerFactoryBean.setDataSource(dataSource);
         return schedulerFactoryBean;
     }
 

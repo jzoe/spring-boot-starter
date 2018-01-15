@@ -13,6 +13,7 @@ import java.util.List;
 @ConfigurationProperties(prefix = "quartz", ignoreInvalidFields = true)
 public class QuartzProperties {
 
+    private Boolean isCluster;
     private Boolean overwriteExistingJobs;
     private Integer startupDelay;
     private Boolean autoStartup;
@@ -21,6 +22,14 @@ public class QuartzProperties {
     private Boolean volatility;
     private Boolean shouldRecover;
     private List<String> excludeServers = new ArrayList<String>();
+
+    public Boolean getCluster() {
+        return isCluster;
+    }
+
+    public void setCluster(Boolean cluster) {
+        isCluster = cluster;
+    }
 
     public Boolean getOverwriteExistingJobs() {
         return overwriteExistingJobs;

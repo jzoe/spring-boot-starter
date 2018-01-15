@@ -16,6 +16,13 @@
     {
       "sourceType": "com.github.quartz.config.QuartzProperties",
       "defaultValue": "true",
+      "name": "quartz.isCluster",
+      "description": "是否开启集群",
+      "type": "java.lang.Boolean"
+    },
+    {
+      "sourceType": "com.github.quartz.config.QuartzProperties",
+      "defaultValue": "true",
       "name": "quartz.overwriteExistingJobs",
       "description": "是否覆盖已经存在的任务",
       "type": "java.lang.Boolean"
