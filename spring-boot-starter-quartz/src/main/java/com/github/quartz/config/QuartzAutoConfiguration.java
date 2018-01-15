@@ -7,8 +7,8 @@ import com.github.quartz.http.ScheduleServlet;
 import com.github.quartz.jdbc.QuartzRepository;
 import com.github.quartz.model.assist.STATUS;
 import com.github.quartz.model.entity.QrtzTimedTask;
-import com.github.quartz.schedule.SqlScriptExecute;
 import com.github.quartz.schedule.ScheduleRefresh;
+import com.github.quartz.schedule.SqlScriptExecute;
 import com.github.quartz.utils.QuartzUtil;
 import com.github.quartz.utils.ScheduleUtil;
 import org.quartz.Scheduler;
@@ -31,6 +31,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.quartz.SchedulerFactoryBean;
 
+import javax.annotation.Resource;
 import javax.sql.DataSource;
 import java.io.File;
 import java.io.FileInputStream;
@@ -48,7 +49,7 @@ import static com.github.quartz.model.constant.HttpConstant.QUARTZ_API;
 @Configuration
 @EnableScheduling
 @ConditionalOnBean(QuartzRepository.class)
-@AutoConfigureAfter(QuartzBeanConfiguration.class)
+@AutoConfigureAfter({QuartzDataBaseConfiguration.class})
 @EnableConfigurationProperties(QuartzProperties.class)
 public class QuartzAutoConfiguration implements BeanFactoryAware, ApplicationContextAware {
 
@@ -59,12 +60,14 @@ public class QuartzAutoConfiguration implements BeanFactoryAware, ApplicationCon
     public static boolean isStart;
     private BeanFactory beanFactory;
 
-    public QuartzAutoConfiguration(QuartzProperties quartzProperties, QuartzRepository quartzRepository, QuartzUtil quartzUtil) {
+    public QuartzAutoConfiguration(SqlScriptExecute sqlScriptExecute, QuartzProperties quartzProperties, QuartzRepository quartzRepository, QuartzUtil quartzUtil) {
         isStart = quartzUtil.quartzIsStart(quartzProperties);
         qrtzTimedTaskList.addAll(getTaskExecutors(quartzRepository));
+        sqlScriptExecute.execute("cleanTask.sql");
     }
 
     @Bean
+    @Resource
     public SchedulerFactoryBean schedulerFactoryBean(DataSource dataSource,
                                                      QuartzProperties quartzProperties,
                                                      @Qualifier("quartzPlaceholder") PropertyPlaceholder quartzPlaceholder,

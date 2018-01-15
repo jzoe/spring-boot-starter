@@ -205,8 +205,8 @@ VALUES ('name', 'admin', 'java.lang.String', '测试参数', 'hello2');
 
 ## 5、quartz配置
 
-此项目默认采用quartz集群方式。具体配置可在发布包根目录下的quartz.properties中查看。
-如需自定义配置，可在自己项目的classpath下新建quartz.properties文件进行配置。
+此项目默认采用quartz单机配置方式。具体配置可在发布包根目录下的quartz.properties中查看。
+如需使用集群配置，可在自己项目的classpath下新建quartz.properties文件进行配置。
 
 ## 6、任务动态更新
 
