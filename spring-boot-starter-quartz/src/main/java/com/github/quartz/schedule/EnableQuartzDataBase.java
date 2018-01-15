@@ -1,5 +1,6 @@
 package com.github.quartz.schedule;
 
+import com.github.quartz.config.QuartzBeanConfiguration;
 import com.github.quartz.config.QuartzDataBaseConfiguration;
 import org.springframework.context.annotation.Import;
 
@@ -11,6 +12,6 @@ import java.lang.annotation.*;
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
-@Import({QuartzDataBaseConfiguration.class})
+@Import({QuartzBeanConfiguration.class, QuartzDataBaseConfiguration.class})
 public @interface EnableQuartzDataBase {
 }

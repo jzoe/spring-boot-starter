@@ -9,16 +9,14 @@ import com.github.quartz.model.assist.STATUS;
 import com.github.quartz.model.entity.QrtzTimedTask;
 import com.github.quartz.schedule.ScheduleRefresh;
 import com.github.quartz.schedule.SqlScriptExecute;
-import com.github.quartz.utils.QuartzUtil;
-import com.github.quartz.utils.ScheduleUtil;
+import com.github.quartz.schedule.util.QuartzUtil;
+import com.github.quartz.schedule.util.ScheduleUtil;
 import org.quartz.Scheduler;
 import org.quartz.Trigger;
 import org.quartz.TriggerKey;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.BeanFactory;
-import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
@@ -51,14 +49,13 @@ import static com.github.quartz.model.constant.HttpConstant.QUARTZ_API;
 @ConditionalOnBean(QuartzRepository.class)
 @AutoConfigureAfter({QuartzDataBaseConfiguration.class})
 @EnableConfigurationProperties(QuartzProperties.class)
-public class QuartzAutoConfiguration implements BeanFactoryAware, ApplicationContextAware {
+public class QuartzAutoConfiguration implements ApplicationContextAware {
 
     private static final Logger logger = LoggerFactory.getLogger(QuartzAutoConfiguration.class);
 
     private ApplicationContext applicationContext;
     private List<QrtzTimedTask> qrtzTimedTaskList = new ArrayList<QrtzTimedTask>();
     public static boolean isStart;
-    private BeanFactory beanFactory;
 
     public QuartzAutoConfiguration(SqlScriptExecute sqlScriptExecute, QuartzProperties quartzProperties, QuartzRepository quartzRepository, QuartzUtil quartzUtil) {
         isStart = quartzUtil.quartzIsStart(quartzProperties);
@@ -113,7 +110,6 @@ public class QuartzAutoConfiguration implements BeanFactoryAware, ApplicationCon
         return new ScheduleRefresh()    //
                 .setScheduler(scheduler)    //
                 .setQuartzRepository(quartzRepository)  //
-                .setApplicationContext(applicationContext) //
                 .setQuartzUtil(quartzUtil);
     }
 
@@ -142,11 +138,6 @@ public class QuartzAutoConfiguration implements BeanFactoryAware, ApplicationCon
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
         this.applicationContext = applicationContext;
-    }
-
-    @Override
-    public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
-        this.beanFactory = beanFactory;
     }
 
     private List<QrtzTimedTask> getTaskExecutors(QuartzRepository quartzRepository) {
