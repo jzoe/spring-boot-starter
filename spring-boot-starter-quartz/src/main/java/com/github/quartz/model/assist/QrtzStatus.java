@@ -1,1 +1,0 @@
-package com.github.quartz.model.assist;public enum QrtzStatus {    U("U"),    E("E"),    D("D"),    S("S");    private String value;    QrtzStatus(String value) {        this.value = value;    }    public String getValue() {        return value;    }    public QrtzStatus setValue(String value) {        return valueOf(value);    }}
