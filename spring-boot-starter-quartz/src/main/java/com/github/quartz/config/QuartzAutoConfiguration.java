@@ -3,6 +3,7 @@ package com.github.quartz.config;
 import com.github.quartz.PropertyPlaceholder;
 import com.github.quartz.http.ScheduleExecutor;
 import com.github.quartz.http.ScheduleExecutorImpl;
+import com.github.quartz.http.ScheduleServlet;
 import com.github.quartz.jdbc.QuartzRepository;
 import com.github.quartz.model.assist.QrtzStatus;
 import com.github.quartz.model.entity.QrtzTimedTask;
@@ -22,21 +23,22 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.boot.web.servlet.ServletRegistrationBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableScheduling;
-import org.springframework.scheduling.quartz.CronTriggerFactoryBean;
 import org.springframework.scheduling.quartz.SchedulerFactoryBean;
 
-import javax.annotation.Resource;
 import javax.sql.DataSource;
 import java.io.File;
 import java.io.FileInputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
+
+import static com.github.quartz.model.constant.HttpConstant.QUARTZ_API;
 
 /**
  * @author 陈敏
@@ -57,34 +59,35 @@ public class QuartzAutoConfiguration implements BeanFactoryAware, ApplicationCon
     private boolean isStart;
     private BeanFactory beanFactory;
 
-    public QuartzAutoConfiguration(QuartzProperties quartzProperties) {
+    public QuartzAutoConfiguration(QuartzProperties quartzProperties, QuartzRepository quartzRepository) {
         isStart = QuartzUtil.quartzIsStart(quartzProperties);
+        qrtzTimedTaskList.addAll(getTaskExecutors(quartzRepository));
     }
 
-    @Bean
-    @Resource
-    public List<BeanInvokingJobDetailFactoryBean> methodInvokingJobDetailFactoryBean(QuartzRepository quartzRepository, QuartzProperties quartzProperties) {
-        if (isStart) {
-            QuartzUtil.createJobDetailBeans(getTaskExecutors(quartzRepository));
-        }
-        return null;
-    }
+//    @Bean
+//    public List<BeanInvokingJobDetailFactoryBean> methodInvokingJobDetailFactoryBean() {
+//        if (isStart) {
+//            QuartzUtil.createJobDetailBeans(qrtzTimedTaskList);
+//        }
+//        return null;
+//    }
+//
+//    @Bean
+//    public List<CronTriggerFactoryBean> cronTriggerFactoryBean() {
+//        if (isStart) {
+//            QuartzUtil.createCronTriggerBeans(qrtzTimedTaskList);
+//        }
+//        return null;
+//    }
 
     @Bean
-    @Resource
-    public List<CronTriggerFactoryBean> cronTriggerFactoryBean(QuartzRepository quartzRepository, QuartzProperties quartzProperties) {
-        if (isStart) {
-            QuartzUtil.createCronTriggerBeans(getTaskExecutors(quartzRepository));
-        }
-        return null;
-    }
-
-    @Bean
-    @Resource
     public SchedulerFactoryBean schedulerFactoryBean(DataSource dataSource,
                                                      QuartzProperties quartzProperties,
                                                      @Qualifier("quartzPlaceholder") PropertyPlaceholder quartzPlaceholder) {
-        if (!isStart) {
+        if (isStart) {
+            QuartzUtil.createJobDetailBeans(qrtzTimedTaskList);
+            QuartzUtil.createCronTriggerBeans(qrtzTimedTaskList);
+        } else {
             return null;
         }
         List<Trigger> triggers = new ArrayList<Trigger>();
@@ -109,14 +112,13 @@ public class QuartzAutoConfiguration implements BeanFactoryAware, ApplicationCon
     }
 
     @Bean
-    public ScheduleUtil scheduleUtil(QuartzProperties quartzProperties, Scheduler scheduler) {
+    public ScheduleUtil scheduleUtil(Scheduler scheduler, QuartzProperties quartzProperties) {
         return new ScheduleUtil()  //
                 .setQuartzProperties(quartzProperties)  //
                 .setScheduler(scheduler);
     }
 
     @Bean
-    @Resource
     public ScheduleRefresh scheduleRefresh(Scheduler scheduler, QuartzRepository quartzRepository) {
         return new ScheduleRefresh()    //
                 .setScheduler(scheduler)    //
@@ -125,14 +127,19 @@ public class QuartzAutoConfiguration implements BeanFactoryAware, ApplicationCon
     }
 
     @Bean
-    public ScheduleExecutor scheduleExecutor(Scheduler scheduler, QuartzRepository quartzRepository) {
+    public ScheduleExecutor scheduleExecutor(Scheduler scheduler) {
         return new ScheduleExecutorImpl()
                 .setApplicationContext(applicationContext)
                 .setScheduler(scheduler);
     }
 
     @Bean
-    public QuartzUtil quartzUtil(QuartzProperties quartzProperties, QuartzRepository quartzRepository) {
+    public QuartzInit quartzCleanner(DataSource dataSource, QuartzProperties quartzProperties) {
+        return new QuartzInit(quartzProperties, dataSource).setSql("cleanTask.sql");
+    }
+
+    @Bean
+    public QuartzUtil quartzUtil(QuartzRepository quartzRepository, QuartzProperties quartzProperties) {
         return new QuartzUtil()
                 .setConfigurableBeanFactory(beanFactory)
                 .setQuartzProperties(quartzProperties)
@@ -141,9 +148,17 @@ public class QuartzAutoConfiguration implements BeanFactoryAware, ApplicationCon
     }
 
     @Bean
-    @Resource
-    public QuartzInit quartzCleanner(QuartzProperties quartzProperties, DataSource dataSource) {
-        return new QuartzInit(quartzProperties, dataSource).setSql("cleanTask.sql");
+    public ScheduleServlet scheduleServlet(ScheduleExecutor scheduleExecutor) {
+        ScheduleServlet scheduleServlet = new ScheduleServlet();
+        scheduleServlet.setScheduleExecutor(scheduleExecutor);
+        return scheduleServlet;
+    }
+
+    @Bean
+    public ServletRegistrationBean servletRegistrationBean(ScheduleServlet scheduleServlet) {
+        ServletRegistrationBean servletRegister = new ServletRegistrationBean(scheduleServlet, QUARTZ_API);
+        servletRegister.setAsyncSupported(true);
+        return servletRegister;
     }
 
     @Override
@@ -161,7 +176,6 @@ public class QuartzAutoConfiguration implements BeanFactoryAware, ApplicationCon
         if (qrtzTimedTasks.isEmpty()) {
             qrtzTimedTasks.addAll(getDefaultTask());
         }
-        qrtzTimedTaskList.addAll(qrtzTimedTasks);
         return qrtzTimedTasks;
     }
 
@@ -195,7 +209,7 @@ public class QuartzAutoConfiguration implements BeanFactoryAware, ApplicationCon
         return properties;
     }
 
-    private List<QrtzTimedTask> getDefaultTask() {
+    private static List<QrtzTimedTask> getDefaultTask() {
         List<QrtzTimedTask> defaultTask = new ArrayList<QrtzTimedTask>();
         String defaultScheduler = "defaultScheduler";
         defaultTask.add(new QrtzTimedTask()
