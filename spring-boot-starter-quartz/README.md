@@ -2,8 +2,15 @@
 
 # spring-boot-starter-quartz
 
-针对公司业务要求，对quartz做了简单的封装，使任务定义简单化，支持相同任务实现，
-做不同任务执行，同时支持表配置传参功能，动态更新任务，新增任务，删除任务。以下是在项目中具体使用方法:
+针对公司业务要求，针对springboot，对quartz做了简单的封装，将其做成SpringBoot的一个Starter模块。主要功能有：
+
+1. 任务配置动态更新，增加，停止，立即执行
+2. 任务立即执行
+3. quartz集群节点是否开启实现可配置化
+
+后续功能继续增加中。。。
+
+以下是在项目中具体使用方法:
 
 ## 1、导入spring-boot-starter-quartz包
 
@@ -23,13 +30,23 @@
 compile('com.github.quartz:spring-boot-starter-quartz:1.0')
 ~~~
 
-## 2、新建任务配置表：
+## 2、开启Quartz自动配置
+
+目前提供了@EnableQuartz，@EnableQuartzBean，@EnableQuartzDataBase三个开启自动配置注解。
+
+@EnableQuartz：开启所有的自动配置
+
+@EnableQuartzBean：开启quartz远程调用客户端配置
+
+@EnableQuartzDataBase：开启quartz远程调用客户端及quartz相关基础Bean的配置
+
+## 3、任务配置表
 
 脚本可在发布包的根目录中获得
 
 Quartz集群的相关表可在Quartz的发布包org.quartz.impl.jdbcjobstore目录下找到相关SQL。
 
-【https://github.com/quartz-scheduler/quartz/blob/master/quartz-core/src/main/resources/org/quartz/impl/jdbcjobstore】
+Quartz官方源码地址：【https://github.com/quartz-scheduler/quartz/blob/master/quartz-core/src/main/resources/org/quartz/impl/jdbcjobstore】
 
 - 以下以Oracle的脚本为例
 
@@ -161,7 +178,7 @@ CREATE INDEX IDX_TIMED_TASK_PARAM_NAME ON QRTZ_TIMED_TASK_PARAM (TASK_NAME)
 3. QRTZ_TIMED_TASK.TASK_CLASS : 任务类路径，类必须加入到Spring上下文中，可支持配置接口，实现类，或者普通类。
 4. QRTZ_TIMED_TASK_PARAM.SORT_ID : 参数顺序，默认使用LinkedHashMap存储，可通过参数顺序，实现通用接口，不同参数配置而实现一个接口多任务配置
 
-## 3、开发任务接口
+## 4、开发任务接口
 
 任务的开发需按照以下标准开发：
 
@@ -182,7 +199,7 @@ public class HelloSVImpl implements IHelloSV {
 }
 ~~~
 
-## 4、任务配置
+## 5、任务配置
 
 在配置任务时，按照以下要求配置：
 
@@ -203,12 +220,12 @@ INSERT INTO QRTZ_TIMED_TASK_PARAM (PARAM_KEY, PARAM_VALUE, PARAM_TYPE, PARAM_DES
 VALUES ('name', 'admin', 'java.lang.String', '测试参数', 'hello2');
 ~~~
 
-## 5、quartz配置
+## 6、quartz配置
 
 此项目默认采用quartz单机配置方式。具体配置可在发布包根目录下的quartz.properties中查看。
 如需使用集群配置，可在自己项目的classpath下新建quartz.properties文件进行配置。
 
-## 6、任务动态更新
+## 7、任务动态更新
 
 - 新增任务
 
@@ -230,7 +247,7 @@ QRTZ_TIMED_TASK_PARAM.PARAM_DESC,
 
 **注：** 当只修改了QRTZ_TIMED_TASK时，只有TASK_EXPRES生效；修改了QRTZ_TIMED_TASK_PARAM配置之后，QRTZ_TIMED_TASK的其他配置都是可以修改的。
 
-## 7、Quartz集群相关表介绍
+## 8、Quartz集群相关表介绍
 
 > qrtz_fired_triggers
 
@@ -274,3 +291,35 @@ Trigger作为Blob类型存储(用于Quartz用户用JDBC创建他们自己定制�
 
 存储少量的有关 Scheduler的状态信息，和别的 Scheduler 实例(假如是用于一个集群中)
 
+## 9、quartz时间表达式
+
+时间格式：s>m>h>d>m>w(?)>y(?)  对应：秒>分>小时>日>月>周>年
+
+- Cron表达式的符号、格式
+
+| 特殊字符 | 含义                                       |
+| :--: | :--------------------------------------- |
+|  ＊   | 匹配所有的值。如：＊在分钟的字段域里表示 每分钟                 |
+|  ?   | 只在日期域和星期域中使用。它被用来指定“非明确的值”               |
+|  -   | 指定一个范围。如：“10-12”在小时域意味着“在10点到12点之间”      |
+|  ,   | 指定几个可选值。如：“MON,WED,FRI”在星期域里表示“星期一、星期三、星期五” |
+|  /   | 指定增量。如：“0/15”在秒域表示在每分钟的第0秒开始，每15秒执行一次。符号“*”在“/”前面等价于0在“/”前面 |
+|  L   | 表示day-of-month和day-of-week域，但在两个字段中的意思不同，例如day-of-month域中表示一个月的最后一天。如果在day-of-week域表示“7”或者“SAT”，如果在day-of-week域中前面加上数字，表示一个月的最后几天，例如“6L”就表示一个月的最后一个星期五 |
+|  W   | 只允许日期域出现。这个字符用于指定日期的最近工作日。例如：如果你在日期域中写“15W”，表示：这个月15号最近的工作日。所以，如果15号是周六，则任务会在14号触发。如果15刚好是周日，则任务会在周一也就是16号触发。如果是在日期域填写“1W”即使1号是周六，那么任务也只会在下周一，也就是3号触发，“W”字符指定的最近工作日是不能跨月份的。字符“W”只能配合一个单独的数值使用，不能够是一个数字段，如：1-15W是错误的 |
+|  LW  | L和W可以在日期域中联合使用，LW表示这个月最后一周的工作日           |
+|  #   | 只允许在星期域中出现。这个字符用于指定本月的某某天。例如：“6#3”表示本月第三周的星期五（6表示星期五，3表示第三周）。“2#1”表示本月第一周的星期一。“4#5”表示第五周的星期三 |
+|  C   | 允许在日期域和星期域出现。这个字符依靠一个指定的“日历”。也就是说这个表达式的值依赖于相关的“日历”的计算结果，如果没有“日历”关联，则等价于所有包含的“日历”。如：日期域是“5C”表示关联“日历”中第一天，或者这个月开始的第一天的后5天。星期域是“1C”表示关联“日历”中第一天，或者星期的第一天的后1天，也就是周日的后一天（周一） |
+
+- Cron表达式特殊字符意义对应表
+
+| 字段    | 允许值          | 允许的特殊字符         |
+| ----- | ------------ | --------------- |
+| 秒     | 0-59         | , - * /         |
+| 分     | 0-59         | , - * /         |
+| 小时    | 0-23         | , - * /         |
+| 月内日期  | 1-31         | , - * ? / L W C |
+| 月     | 1-12或JAN-DEC | , - * /         |
+| 周内日期  | 1-7或SUN-SAT  | , - * ? / L C # |
+| 年（可选） | 留空，1970-2099 | , - * /         |
+
+时间表达式在线生成器：http://cron.qqe2.com/

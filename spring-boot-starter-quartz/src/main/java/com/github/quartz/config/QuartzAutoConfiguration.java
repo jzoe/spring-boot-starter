@@ -17,7 +17,6 @@ import org.quartz.TriggerKey;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -58,16 +57,20 @@ public class QuartzAutoConfiguration implements ApplicationContextAware {
     public static boolean isStart;
 
     public QuartzAutoConfiguration(SqlScriptExecute sqlScriptExecute, QuartzProperties quartzProperties, QuartzRepository quartzRepository, QuartzUtil quartzUtil) {
+        // 当前quartz节点是否启动
         isStart = quartzUtil.quartzIsStart(quartzProperties);
-        qrtzTimedTaskList.addAll(getTaskExecutors(quartzRepository));
-        sqlScriptExecute.execute("cleanTask.sql");
+        if (isStart) {
+            // 当前集群节点可以启动时，加载任务
+            qrtzTimedTaskList.addAll(getTaskExecutors(quartzRepository));
+            // 启动节点之前，清楚数据库已存留的任务信息
+            sqlScriptExecute.execute("cleanTask.sql");
+        }
     }
 
     @Bean
     @Resource
     public SchedulerFactoryBean schedulerFactoryBean(DataSource dataSource,
                                                      QuartzProperties quartzProperties,
-                                                     @Qualifier("quartzPlaceholder") PropertyPlaceholder quartzPlaceholder,
                                                      QuartzUtil quartzUtil) {
         if (isStart) {
             quartzUtil.createJobDetailBeans(qrtzTimedTaskList);
@@ -83,9 +86,16 @@ public class QuartzAutoConfiguration implements ApplicationContextAware {
         SchedulerFactoryBean schedulerFactoryBean = new SchedulerFactoryBean();
         schedulerFactoryBean.setTriggers(triggers.toArray(new Trigger[0]));
         Properties properties = quartzProperties();
+        PropertyPlaceholder quartzPlaceholder;
         if (properties.isEmpty()) {
+            if (quartzProperties.getCluster()) {
+                quartzPlaceholder = (PropertyPlaceholder) applicationContext.getBean("quartzClusterPlaceholder");
+            } else {
+                quartzPlaceholder = (PropertyPlaceholder) applicationContext.getBean("quartzPlaceholder");
+            }
             properties.putAll(quartzPlaceholder.getProperties());
         }
+
         schedulerFactoryBean.setQuartzProperties(properties);
         // 用于quartz集群,QuartzScheduler 启动时更新己存在的Job，这样就不用每次修改targetObject后删除qrtz_job_details表对应记录了
         if (quartzProperties.getCluster()) {
