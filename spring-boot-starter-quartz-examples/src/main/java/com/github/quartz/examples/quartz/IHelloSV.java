@@ -1,0 +1,1 @@
+package com.github.quartz.examples.quartz;import java.util.Map;public interface IHelloSV {    void hello(Map<String, Object> param);}

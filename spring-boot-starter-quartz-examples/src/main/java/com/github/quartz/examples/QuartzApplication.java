@@ -6,6 +6,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
 @EnableQuartz
+//@PropertySource(value = "classpath:application.yml", ignoreResourceNotFound = true)
 public class QuartzApplication {
 
     public static void main(String[] args) {
