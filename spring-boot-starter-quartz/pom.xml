@@ -47,7 +47,6 @@
         <spring-boot.version>1.4.2.RELEASE</spring-boot.version>
         <spring.version>4.3.4.RELEASE</spring.version>
         <quartz.version>2.2.3</quartz.version>
-        <lombok.version>1.16.18</lombok.version>
         <fastjson.version>1.2.34</fastjson.version>
         <httpclient.version>4.5.3</httpclient.version>
         <slf4j.version>1.7.21</slf4j.version>
@@ -93,11 +92,6 @@
                     <artifactId>slf4j-api</artifactId>
                 </exclusion>
             </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
-            <version>${lombok.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
