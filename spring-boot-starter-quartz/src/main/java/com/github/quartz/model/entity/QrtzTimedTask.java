@@ -24,6 +24,7 @@ public class QrtzTimedTask implements Serializable {
     private STATUS status = STATUS.U;
     private Date createTime;
     private String creater;
+    private String uri;
 
     private List<QrtzTimedTaskParam> qrtzTimedTaskParams = new ArrayList<QrtzTimedTaskParam>();
 
@@ -111,6 +112,14 @@ public class QrtzTimedTask implements Serializable {
     public QrtzTimedTask setCreater(String creater) {
         this.creater = creater;
         return this;
+    }
+
+    public String getUri() {
+        return uri;
+    }
+
+    public void setUri(String uri) {
+        this.uri = uri;
     }
 
     public List<QrtzTimedTaskParam> getQrtzTimedTaskParams() {
