@@ -56,24 +56,39 @@ public class QuartzAutoConfiguration implements ApplicationContextAware {
     private List<QrtzTimedTask> qrtzTimedTaskList = new ArrayList<QrtzTimedTask>();
     public static boolean isStart;
 
-    public QuartzAutoConfiguration(SqlScriptExecute sqlScriptExecute, QuartzProperties quartzProperties, QuartzRepository quartzRepository, QuartzUtil quartzUtil) {
+    public QuartzAutoConfiguration(SqlScriptExecute sqlScriptExecute, QuartzProperties quartzProperties,
+                                   QuartzRepository quartzRepository, QuartzUtil quartzUtil) {
         // 当前quartz节点是否启动
         isStart = quartzUtil.quartzIsStart(quartzProperties);
         if (isStart) {
             // 当前集群节点可以启动时，加载任务
             qrtzTimedTaskList.addAll(getTaskExecutors(quartzRepository));
             // 启动节点之前，清楚数据库已存留的任务信息
-            sqlScriptExecute.execute("cleanTask.sql");
+
+            Boolean durability = quartzProperties.getDurability();
+            // 任务完成后，不允许保留在数据库，需要清理
+            if (!durability) {
+                sqlScriptExecute.execute("cleanTask.sql");
+            }
         }
     }
 
+    /**
+     * 注册任务
+     * @param dataSource
+     * @param quartzProperties
+     * @param quartzUtil
+     * @return
+     */
     @Bean
     @Resource
     public SchedulerFactoryBean schedulerFactoryBean(DataSource dataSource,
                                                      QuartzProperties quartzProperties,
                                                      QuartzUtil quartzUtil) {
         if (isStart) {
+            // 动态创建JobDetail并注册到Spring中
             quartzUtil.createJobDetailBeans(qrtzTimedTaskList);
+            // 动态创建CronTrigger并注册到Spring中
             quartzUtil.createCronTriggerBeans(qrtzTimedTaskList);
         } else {
             return null;
@@ -83,8 +98,12 @@ public class QuartzAutoConfiguration implements ApplicationContextAware {
             Trigger trigger = (Trigger) applicationContext.getBean(qrtzTimedTask.getTaskName() + "Trigger");
             triggers.add(trigger);
         }
+
+        // 创建Quartz任务调度工厂，并将任务加入到工厂中
         SchedulerFactoryBean schedulerFactoryBean = new SchedulerFactoryBean();
         schedulerFactoryBean.setTriggers(triggers.toArray(new Trigger[0]));
+
+        // 加载Quartz配置(分为单机配置或集群配置，并支持Quartz配置分离)
         Properties properties = quartzProperties();
         PropertyPlaceholder quartzPlaceholder;
         if (properties.isEmpty()) {
@@ -102,12 +121,18 @@ public class QuartzAutoConfiguration implements ApplicationContextAware {
             schedulerFactoryBean.setOverwriteExistingJobs(quartzProperties.getOverwriteExistingJobs());
             schedulerFactoryBean.setDataSource(dataSource);
         }
-        // QuartzScheduler 延时启动，应用启动完10秒后 QuartzScheduler 再启动
+        // QuartzScheduler 延时启动，应用启动完n秒后 QuartzScheduler 再启动
         schedulerFactoryBean.setStartupDelay(quartzProperties.getStartupDelay());
         schedulerFactoryBean.setAutoStartup(quartzProperties.getAutoStartup());
         return schedulerFactoryBean;
     }
 
+    /**
+     * 任务控制工具类
+     * @param scheduler
+     * @param quartzProperties
+     * @return
+     */
     @Bean
     public ScheduleUtil scheduleUtil(Scheduler scheduler, QuartzProperties quartzProperties) {
         return new ScheduleUtil()  //
@@ -115,6 +140,13 @@ public class QuartzAutoConfiguration implements ApplicationContextAware {
                 .setScheduler(scheduler);
     }
 
+    /**
+     * 注册任务动态刷新器
+     * @param scheduler
+     * @param quartzRepository
+     * @param quartzUtil
+     * @return
+     */
     @Bean
     public ScheduleRefresh scheduleRefresh(Scheduler scheduler, QuartzRepository quartzRepository, QuartzUtil quartzUtil) {
         return new ScheduleRefresh()    //
@@ -123,6 +155,12 @@ public class QuartzAutoConfiguration implements ApplicationContextAware {
                 .setQuartzUtil(quartzUtil);
     }
 
+    /**
+     * 注册定时任务调度器
+     * @param scheduler
+     * @param quartzUtil
+     * @return
+     */
     @Bean
     public ScheduleExecutor scheduleExecutor(Scheduler scheduler, QuartzUtil quartzUtil) {
         return new ScheduleExecutorImpl()
@@ -138,6 +176,11 @@ public class QuartzAutoConfiguration implements ApplicationContextAware {
         return scheduleServlet;
     }
 
+    /**
+     * 注册Quartz提供对外访问接口
+     * @param scheduleServlet
+     * @return
+     */
     @Bean
     public ServletRegistrationBean servletRegistrationBean(ScheduleServlet scheduleServlet) {
         ServletRegistrationBean servletRegister = new ServletRegistrationBean(scheduleServlet, QUARTZ_API);
@@ -150,6 +193,11 @@ public class QuartzAutoConfiguration implements ApplicationContextAware {
         this.applicationContext = applicationContext;
     }
 
+    /**
+     * 获取所有任务的配置信息
+     * @param quartzRepository
+     * @return
+     */
     private List<QrtzTimedTask> getTaskExecutors(QuartzRepository quartzRepository) {
         List<QrtzTimedTask> qrtzTimedTasks = quartzRepository.queryValidTaskAndParam(STATUS.U);
         if (qrtzTimedTasks.isEmpty()) {
